@@ -68,7 +68,7 @@ mkdir privoice_hello
 
 cd privoice_hello
 
-
+<pre>
 Create a file named skill.json. It should look like this ...
 
 {
@@ -78,6 +78,7 @@ Create a file named skill.json. It should look like this ...
 	"description":"Hello World skill.",
 	"search_terms":["hello", "hi"]
 }
+</pre>
 
 
 Finally, create a file named __init__.py and put this in it ...
@@ -147,6 +148,7 @@ $ cd privoice_my_skill
 
 Now create a file named skill.json. It should look like this ...
 
+<pre>
 {
 	"skill_id":"my_skill",
 	"name":"my skill",
@@ -154,6 +156,7 @@ Now create a file named skill.json. It should look like this ...
 	"description":"My first skill.",
 	"search_terms":["my", "mine", "me"]
 }
+</pre>
 
 
 Finally, create a file named __init__.py and put this in it ...
