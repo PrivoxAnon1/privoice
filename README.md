@@ -312,7 +312,6 @@ Current Skills List
 
 + alarm
 + connectivity
-+ email
 + example1
 + ha_skill
 + help
@@ -325,7 +324,6 @@ Current Skills List
 + local_wiki
 + local_music
 + duck_duck_go
-+ wolfram_alpha
 
 
 
