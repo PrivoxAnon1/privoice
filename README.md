@@ -188,6 +188,27 @@ if __name__ == '__main__':
     Event().wait()  # Wait forever
 </pre>
 
+Finally, add the new repository to the skill manager repositories json file. It is located in framework/services/skill_mamager/repositories.json.
+
+Edit this file to point to your new repository. Change the values MYHOME and MYREPO
+
+[
+
+{
+    "repo_name":"Privox Approved Skills",
+    "repo_uri":"https://github.com/PrivoxAnon1/privox.git",
+    "repo_description":"Privox provided skills"
+},
+
+{
+    "repo_name":"Local Skills",
+    "repo_uri":"/home/MYHOME/MYREPO/",
+    "repo_description":"User provided local skills"
+}
+
+]
+
+The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills. 
 
 
 Skill Developer API
