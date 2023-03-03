@@ -1,4 +1,4 @@
-#PriVoice - a privacy respecting voice assistant
+# PriVoice - a privacy respecting voice assistant
 
 Installation
 ------------
@@ -11,7 +11,7 @@ Verify Installation
 
 . ./scripts/init_env.sh
 
-# yes, that's dot space dot slash.
+Yes, that's dot space dot slash.
 
 cd test/voice
 
@@ -82,6 +82,7 @@ Create a file named skill.json. It should look like this ...
 
 Finally, create a file named __init__.py and put this in it ...
 
+<pre>
 from skills.pvx_base import PriVoice
 from threading import Event
 
@@ -97,7 +98,7 @@ class HelloSkill(PriVoice):
 if __name__ == '__main__':
     hs = HelloSkill()
     Event().wait()  # Wait forever
-
+</pre>
 
 Now change back to the base PriVoice directory 
 
@@ -126,9 +127,11 @@ Creating a local repository
 Open your terminal and create a directory somewhere on your file system. For example 
 
 $ pwd
+
 /home/anon1
 
 $ mkdir my_repo
+
 $ cd my_repo
 
 $ pwd
@@ -155,7 +158,7 @@ Now create a file named skill.json. It should look like this ...
 
 Finally, create a file named __init__.py and put this in it ...
 
-
+<pre>
 from skills.pvx_base import PriVoice
 from threading import Event
 
@@ -183,6 +186,7 @@ class MySkill(PriVoice):
 if __name__ == '__main__':
     ms = MySkill()
     Event().wait()  # Wait forever
+</pre>
 
 
 
