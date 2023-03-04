@@ -1,5 +1,35 @@
 # PriVoice - a privacy respecting voice assistant
 
+Overview
+--------
+
+PriVoice is a full featured, privacy respecting, open source voice assistant. 
+
++ Runs locally with no network connection required.
++ Privacy respecting, secure operation. No data leaves your system.
++ NLP (Noun/Verb) Intent Matching. 
++ Unrestricted use of user contributed skills.
++ Unlimited skill stackability. Hyper-link based VUI.
+
+Current constraints on quality STT like poor echo cancellation, CPU processing power, GPU/TPUs (or lack thereof) and RAM (not enough) will eventually disappear at which point a fully functional, completely local privacy respecting framework will become the norm. PriVoice is not designed for inferior hardware and if you run it on low end systems you will most likely be disappointed. That being said, most laptops or desktops with a decent headset can run PriVoice with no issues.   
+
+
+PriVoice Goals
+PriVoice was created to address the limitations inherrent in most existing voice frameworks. Issues arising from skill interractions, channel focus, out of band recognition, barge-in and skill isolation are of no concern to the PriVoice skill developer. The skill developer is free to assume this all just works as it is supposed to and is free to concentrate on whatever the skill is supposed to do. 
+
+
+Skills should be able to interrupt each other in an orderly manner and should be isolated from other skills. Most voice frameworks are limited to one active skill and one background skill. Skills can not interrupt each other to any depth. While this may be the way some users want their system to behave the framework should not impose these arbitrary limitation on the Voice UI (VUI), in fact this concept is central to the implementation of hyper-links, and the natural way we interract with the web. To this end PriVoice supports unlimited stackability; the ability for skills to interrupt each other in an orderly manner. 
+
+
+To better understand this objective, consider asking your voice assistant to play the Beatles, then while the song is playing, ask who were the Beatles and while that answer is playing ask who was John Lennon. From a voice UI perspective you are linking from one article to the next with the expectation being that when you go back (or stop/exit the current article) you will pick up where you left off with the previous one. Most existing frameworks when given this scenario will not behave in the expected manner. PriVoice skills are governed by a strict set of consistent rules which determine what will happen when one category of skill (User, System, Media, QnA) interrupts another. PriVoice skills need not concern themselves with system level issues like pause, resume, stop, skip, etc. These are handled seamlessly by the underlying framework.  
+
+
+PriVoice also supports skill isolation. Each skill runs in its own process space. Skills operate out of their own virtual environment. Adding skills does not pollute the virtual environment of the system or other skills. 
+
+
+But perhaps the most important feature PriVoice provides is NLP based intent matching and out of band messaging. Everything above is operational. NLP style (Subject/Verb) intent matching and dynamic out of band support is progressive. PriVoice uses a concept called shallow parsing (a semi lexical structure or SLS) to extract meaning from text. While the results are similar to those provided using packages like spacey, the approach is far different and allow for intent clash detection and true machine learning for unrecognized lexical structures. See the details on shallow parsing and true AI for more informnation on the basic concepts and strategies employed.
+
+
 Installation
 ------------
 
