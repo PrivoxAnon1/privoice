@@ -15,6 +15,8 @@ Current constraints on quality STT like poor echo cancellation, CPU processing p
 
 
 PriVoice Goals
+--------------
+
 PriVoice was created to address the limitations inherrent in most existing voice frameworks. Issues arising from skill interractions, channel focus, out of band recognition, barge-in and skill isolation are of no concern to the PriVoice skill developer. The skill developer is free to assume this all just works as it is supposed to and is free to concentrate on whatever the skill is supposed to do. 
 
 
@@ -27,7 +29,7 @@ To better understand this objective, consider asking your voice assistant to pla
 PriVoice also supports skill isolation. Each skill runs in its own process space. Skills operate out of their own virtual environment. Adding skills does not pollute the virtual environment of the system or other skills. 
 
 
-But perhaps the most important feature PriVoice provides is NLP based intent matching and out of band messaging. Everything above is operational. NLP style (Subject/Verb) intent matching and dynamic out of band support is progressive. PriVoice uses a concept called shallow parsing (a semi lexical structure or SLS) to extract meaning from text. While the results are similar to those provided using packages like spacey, the approach is far different and allow for intent clash detection and true machine learning for unrecognized lexical structures. See the details on shallow parsing and true AI for more informnation on the basic concepts and strategies employed.
+But perhaps the most important feature PriVoice provides is NLP based intent matching and out of band messaging. Everything above is operational. NLP style (Subject/Verb) intent matching and dynamic out of band support is progressive. PriVoice uses a concept called shallow parsing (a semi lexical structure or SLS) to extract meaning from text. While the results are similar to those provided using packages like spacey, the approach is far different and allow for intent clash detection and true machine learning for unrecognized lexical structures. See the details on shallow parsing and true AI for more information on the basic concepts and strategies employed.
 
 
 Installation
