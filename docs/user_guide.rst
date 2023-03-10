@@ -113,34 +113,33 @@ removal of skills and supports the following spoken commands ...
 + help skills
 + help skill manager
 
-By default PriVoice consists of services, system skills and user skills. 
-Users may install new skills or remove existing skills either using the 
+PriVoice consists of *services*, *system skills* and *user skills*. 
+Users may install new skills or remove existing skills using either the 
 skill manager or the command line. The :ref:`Skills` page shows how to
 easily create new skills and add repositories to the system.
 
 =================
 PriVoice Services
 =================
-+ Speech Recognizer (STT)
-+ Intent Handler
-+ Text to Speech (TTS)
-+ Media (play mp3 or wav files)
-+ Skill Manager (install/remove skills)
++ Speech Recognizer (STT) converts audio in to text
++ Intent Handler converts text to intents and dispatches skills
++ Text to Speech (TTS) provides ability to play a text string
++ Media allows playing  mp3 or wav data
++ Skill Manager manages skill installation and removal using voice
 
 =====================
 Default System Skills
 =====================
-+ skill manager
-+ volume skill
-+ media skill
 + system skill
++ volume skill
 + fallback skill
-+ alarm
++ media skill
++ alarm skill
 
 =====================
 Default User Skills
 =====================
-+ time date skill
++ time and date skill
 + example skill
 + weather skill(i)
 + wiki skill(i)

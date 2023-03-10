@@ -181,19 +181,191 @@ It is located in framework/services/skill_mamager/repositories.json.</p>
 <p>The ‘example1’ skill located in the user_skills/ directory is a good example
 of how a basic skill can communicate with the user. The time and date skill
 is an example of a minimalistic user skill.</p>
-<p>All skills that inherit from the PriVoice class have the following methods available.</p>
-<ul class="simple">
-<li><p>speak(text [, wait_callback, engine, model, voice])</p></li>
-<li><p>play_media(file_uri [, delete_on_complete])</p></li>
-<li><p>converse(timeout)</p></li>
-<li><p>get_user_input()</p></li>
-<li><p>get_confirmation()</p></li>
-<li><p>send_message(message)</p></li>
-<li><p>register_intent(intent_type, verb, subject, callback)</p></li>
-<li><p>sync_speak(text [, wait_callback, engine, model, voice])</p></li>
-<li><p>sync_listen(prompt)</p></li>
-</ul>
+<p>All skills that inherit from the PriVoice class have the following methods available to them.</p>
+<section id="speak">
+<h3>speak()<a class="headerlink" href="#speak" title="Permalink to this heading">¶</a></h3>
+<p>The speak call is used to convert a text string to wav data and then play the wav data on the audio output channel.
+The system will handle chunking and other system related functions like ‘pause’, ‘resume’, etc.
+Note the speak call is a non blocking call so your skill will regain control immediately, <strong>before</strong> the actual audio has <strong>completed</strong> playing!
+If you call speak again without waiting until the callback is called you will interrupt yourself which is probably <strong>not</strong> what you want.
+To avoid this use the callback, or use the <em>sync_speak()</em> call described below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">speak</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">wait_callback</span><span class="p">,</span> <span class="n">engine</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">voice</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">text</span> <span class="o">-</span> <span class="n">text</span> <span class="n">string</span> <span class="n">to</span> <span class="n">speak</span>
+
+<span class="c1"># optional</span>
+<span class="n">wait_callback</span> <span class="o">-</span> <span class="n">method</span> <span class="n">to</span> <span class="n">call</span> <span class="n">when</span> <span class="n">speak</span> <span class="n">has</span> <span class="n">completed</span>
+<span class="n">engine</span> <span class="o">-</span> <span class="n">currently</span> <span class="n">ignored</span>
+<span class="n">model</span> <span class="o">-</span> <span class="n">the</span> <span class="n">TTS</span> <span class="n">model</span> <span class="n">to</span> <span class="n">use</span>
+<span class="n">voice</span> <span class="o">-</span> <span class="n">the</span> <span class="n">TTS</span> <span class="n">voice</span> <span class="n">to</span> <span class="n">use</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s2">&quot;Hello Joe&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">wait_callback</span><span class="o">=</span><span class="n">my_callback</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="s2">&quot;p270&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sync-speak">
+<h3>sync_speak()<a class="headerlink" href="#sync-speak" title="Permalink to this heading">¶</a></h3>
+<p>The sync speak call is used to convert a text string to wav data and then play the wav data on the audio output channel.
+The system will handle chunking and other system related functions like ‘pause’, ‘resume’, etc.
+The sync_speak call is a blocking call so your skill will be suspended until either the call completes or it times out.
+The return value indicates whether the call actually completed (return value is True) or if it timed out (returns False).
+You must set the sync flag in the super constructor of your skill to True if you use this method..</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sync_speak</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">wait_callback</span><span class="p">,</span> <span class="n">engine</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">voice</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">text</span> <span class="o">-</span> <span class="n">text</span> <span class="n">string</span> <span class="n">to</span> <span class="n">speak</span>
+
+<span class="c1"># optional</span>
+<span class="n">engine</span> <span class="o">-</span> <span class="n">currently</span> <span class="n">ignored</span>
+<span class="n">model</span> <span class="o">-</span> <span class="n">the</span> <span class="n">TTS</span> <span class="n">model</span> <span class="n">to</span> <span class="n">use</span>
+<span class="n">voice</span> <span class="o">-</span> <span class="n">the</span> <span class="n">TTS</span> <span class="n">voice</span> <span class="n">to</span> <span class="n">use</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Who stole the cookies from the cookie jar?&quot;</span>
+
+<span class="c1"># speak using default voice</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">sync_speak</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+<span class="c1"># speak using different voice</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">sync_speak</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="s2">&quot;p270&quot;</span><span class="p">)</span>
+
+<span class="c1"># speak using different voice and model</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">sync_speak</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;tts_models/en/vctk/vits&quot;</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="s2">&quot;p270&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="play-media">
+<h3>play_media()<a class="headerlink" href="#play-media" title="Permalink to this heading">¶</a></h3>
+<p>The play_media call plays a media file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">play_media</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">delete_on_complete</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">file</span> <span class="o">-</span> <span class="n">the</span> <span class="n">file</span> <span class="n">to</span> <span class="n">play</span><span class="o">.</span>
+
+<span class="c1"># optional</span>
+<span class="n">delete_on_complete</span> <span class="o">-</span> <span class="k">if</span> <span class="kc">True</span> <span class="n">will</span> <span class="n">delete</span> <span class="n">the</span> <span class="n">file</span> <span class="n">after</span> <span class="n">it</span> <span class="n">has</span> <span class="n">been</span> <span class="n">played</span>
+<span class="n">media_type</span> <span class="o">-</span> <span class="s1">&#39;wav&#39;</span><span class="p">,</span> <span class="s1">&#39;mp3&#39;</span><span class="p">,</span> <span class="ow">or</span> <span class="s1">&#39;stream_vlc&#39;</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">play_media</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;stream_vlc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-user-input">
+<h3>get_user_input()<a class="headerlink" href="#get-user-input" title="Permalink to this heading">¶</a></h3>
+<p>The get_user_input call waits for a user utterance and either calls the user
+provided callback method with the user input, or it calls the user supplied
+timeout method if a timeout occurs.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">get_user_input</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">timeout_callback</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">callback</span> <span class="o">-</span> <span class="n">the</span> <span class="n">method</span> <span class="n">to</span> <span class="n">call</span> <span class="k">with</span> <span class="n">the</span> <span class="n">user</span> <span class="n">utterance</span><span class="o">.</span>
+
+<span class="c1"># optional</span>
+<span class="n">prompt</span> <span class="o">-</span> <span class="k">if</span> <span class="n">present</span> <span class="n">will</span> <span class="n">be</span> <span class="n">spoken</span> <span class="n">first</span>
+<span class="n">timeout_callback</span> <span class="o">-</span> <span class="k">if</span> <span class="n">provided</span> <span class="n">will</span> <span class="n">be</span> <span class="n">called</span> <span class="k">if</span> <span class="n">a</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="n">reached</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">get_user_input</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_user_input</span><span class="p">,</span>
+                     <span class="s2">&quot;Who are you?&quot;</span><span class="p">,</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">handle_user_input_timeout</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-user-confirmation">
+<h3>get_user_confirmation()<a class="headerlink" href="#get-user-confirmation" title="Permalink to this heading">¶</a></h3>
+<p>The get_user_confirmation call is a special case of the
+get_user_input call. When the user callback is invoked it is provided with
+either the string ‘yes’ or the string ‘no’ based on the user’s response.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">get_user_confirmation</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">timeout_callback</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">callback</span> <span class="o">-</span> <span class="n">the</span> <span class="n">method</span> <span class="n">to</span> <span class="n">call</span> <span class="k">with</span> <span class="n">the</span> <span class="n">user</span> <span class="n">utterance</span><span class="o">.</span>
+
+<span class="c1"># optional</span>
+<span class="n">prompt</span> <span class="o">-</span> <span class="k">if</span> <span class="n">present</span> <span class="n">will</span> <span class="n">be</span> <span class="n">spoken</span> <span class="n">first</span>
+<span class="n">timeout_callback</span> <span class="o">-</span> <span class="k">if</span> <span class="n">provided</span> <span class="n">will</span> <span class="n">be</span> <span class="n">called</span> <span class="k">if</span> <span class="n">a</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="n">reached</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">get_user_fonfirmation</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_user_input</span><span class="p">,</span>
+                     <span class="s2">&quot;Confirm you want to do bla.&quot;</span><span class="p">,</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">handle_user_input_timeout</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="send-message">
+<h3>send_message()<a class="headerlink" href="#send-message" title="Permalink to this heading">¶</a></h3>
+<p>Sends a <strong>‘skill’</strong> message on the bus to the target skill id. Note, message must be a dict.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">send_message</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+<span class="c1"># required</span>
+<span class="n">target</span> <span class="o">-</span> <span class="n">the</span> <span class="n">endpoint</span> <span class="n">target</span> <span class="n">bus</span> <span class="n">identifier</span><span class="o">.</span> <span class="n">also</span> <span class="n">known</span> <span class="k">as</span> <span class="n">a</span> <span class="n">skill</span> <span class="nb">id</span><span class="o">.</span>
+<span class="n">message</span> <span class="o">-</span> <span class="n">a</span> <span class="nb">dict</span> <span class="n">to</span> <span class="n">be</span> <span class="n">sent</span> <span class="n">on</span> <span class="n">the</span> <span class="n">bus</span><span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">message</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subtype&#39;</span><span class="p">:</span><span class="s1">&#39;arbitrary_value&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;skill_data&#39;</span><span class="p">:</span><span class="s1">&#39;testing one two three&#39;</span><span class="p">}</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="s1">&#39;some_skill&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="s1">&#39;some_skill&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">:</span><span class="s1">&#39;123&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="register-intent">
+<h3>register_intent()<a class="headerlink" href="#register-intent" title="Permalink to this heading">¶</a></h3>
+<p>Bind a sentence type, subject and verb to a callback.
+Ultimately sends a message on the bus to the intent service.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">register_intent</span><span class="p">(</span><span class="n">intent_type</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+
+<span class="c1"># required</span>
+<span class="n">intent_type</span> <span class="o">-</span> <span class="s1">&#39;C&#39;</span> <span class="k">for</span> <span class="n">command</span> <span class="ow">or</span> <span class="s1">&#39;Q&#39;</span> <span class="k">for</span> <span class="n">question</span>
+<span class="n">verb</span> <span class="o">-</span> <span class="n">the</span> <span class="n">verb</span> <span class="n">to</span> <span class="n">match</span>
+<span class="n">subject</span> <span class="o">-</span> <span class="n">the</span> <span class="n">subject</span> <span class="n">to</span> <span class="n">match</span>
+<span class="n">callback</span> <span class="o">-</span> <span class="n">method</span> <span class="n">to</span> <span class="n">be</span> <span class="n">called</span> <span class="n">on</span> <span class="n">an</span> <span class="n">intent</span> <span class="n">match</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TimeSkill</span><span class="p">(</span><span class="n">PriVoice</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">skill_id</span><span class="o">=</span><span class="s1">&#39;time_skill&#39;</span><span class="p">,</span> <span class="n">skill_category</span><span class="o">=</span><span class="s1">&#39;system&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;what&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_time_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;what&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_date_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;what&#39;</span><span class="p">,</span> <span class="s1">&#39;today&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_date_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;what&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_day_match</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sync-listen">
+<h3>sync_listen()<a class="headerlink" href="#sync-listen" title="Permalink to this heading">¶</a></h3>
+<p>Wait for user input. Returns a string representing the user’s utterance, or an
+empty string on a timeout.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sync_listen</span><span class="p">()</span>
+
+<span class="c1"># optional</span>
+<span class="n">prompt</span> <span class="o">-</span> <span class="k">if</span> <span class="n">present</span> <span class="n">will</span> <span class="n">be</span> <span class="n">played</span> <span class="n">first</span>
+</pre></div>
+</div>
+<p><strong>Examples:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">user_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_listen</span><span class="p">()</span>
+
+<span class="n">user_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_listen</span><span class="p">(</span><span class="s2">&quot;Who are you?&quot;</span><span class="p">)</span>
+
+<span class="n">say</span> <span class="o">=</span> <span class="s2">&quot;Say hello&quot;</span>
+<span class="n">user_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_listen</span><span class="p">(</span><span class="n">say</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Note: you must set the sync flag in the super constructor to True if you use either of the “sync” methods (sync_speak and sync_listen).</p>
+</section>
 </section>
 <section id="q-a-skills">
 <h2>Q&amp;A Skills<a class="headerlink" href="#q-a-skills" title="Permalink to this heading">¶</a></h2>
@@ -237,17 +409,6 @@ def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </
 </div>
 <p>See the radio skill source code for an example of a media skill.</p>
 </section>
-<section id="advanced-topics">
-<h2>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permalink to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Skill Categories</p></li>
-<li><p>Changing the TTS Voice</p></li>
-<li><p>Registering Intents</p></li>
-<li><p>Getting User Input</p></li>
-<li><p>The Message Bus</p></li>
-<li><p>Synchronous Versus Asynchronous Skills</p></li>
-</ul>
-</section>
 </section>
 
 
@@ -277,10 +438,19 @@ def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-local-repository">Creating a Local Repository</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#skill-api">Skill API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skill-api">Skill API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#speak">speak()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sync-speak">sync_speak()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#play-media">play_media()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-user-input">get_user_input()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-user-confirmation">get_user_confirmation()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#send-message">send_message()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#register-intent">register_intent()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sync-listen">sync_listen()</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#q-a-skills">Q&amp;A Skills</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#media-skills">Media Skills</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-topics">Advanced Topics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>

@@ -191,17 +191,232 @@ The 'example1' skill located in the user_skills/ directory is a good example
 of how a basic skill can communicate with the user. The time and date skill
 is an example of a minimalistic user skill.
 
-All skills that inherit from the PriVoice class have the following methods available.
+All skills that inherit from the PriVoice class have the following methods available to them.
 
-+ speak(text [, wait_callback, engine, model, voice])
-+ play_media(file_uri [, delete_on_complete])
-+ converse(timeout)
-+ get_user_input()
-+ get_confirmation()
-+ send_message(message)
-+ register_intent(intent_type, verb, subject, callback)
-+ sync_speak(text [, wait_callback, engine, model, voice])
-+ sync_listen(prompt)
+
+-------
+speak()
+-------
+The speak call is used to convert a text string to wav data and then play the wav data on the audio output channel. 
+The system will handle chunking and other system related functions like 'pause', 'resume', etc.
+Note the speak call is a non blocking call so your skill will regain control immediately, **before** the actual audio has **completed** playing!
+If you call speak again without waiting until the callback is called you will interrupt yourself which is probably **not** what you want.
+To avoid this use the callback, or use the *sync_speak()* call described below.
+
+
+.. code-block:: python
+
+   speak(text, wait_callback, engine, model, voice)
+
+   # required
+   text - text string to speak
+
+   # optional
+   wait_callback - method to call when speak has completed
+   engine - currently ignored
+   model - the TTS model to use
+   voice - the TTS voice to use
+
+**Examples:**
+
+.. code-block:: python
+
+   self.speak("Hello Joe")
+   self.speak(txt, wait_callback=my_callback, voice="p270")
+
+------------
+sync_speak()
+------------
+The sync speak call is used to convert a text string to wav data and then play the wav data on the audio output channel. 
+The system will handle chunking and other system related functions like 'pause', 'resume', etc.
+The sync_speak call is a blocking call so your skill will be suspended until either the call completes or it times out. 
+The return value indicates whether the call actually completed (return value is True) or if it timed out (returns False).
+You must set the sync flag in the super constructor of your skill to True if you use this method..
+
+.. code-block:: python
+
+   sync_speak(text, wait_callback, engine, model, voice)
+
+   # required
+   text - text string to speak
+
+   # optional
+   engine - currently ignored
+   model - the TTS model to use
+   voice - the TTS voice to use
+
+**Examples:**
+
+.. code-block:: python
+
+   text = "Who stole the cookies from the cookie jar?"
+
+   # speak using default voice
+   self.sync_speak(text)
+
+   # speak using different voice
+   self.sync_speak(text, voice="p270")
+
+   # speak using different voice and model
+   self.sync_speak(text, model="tts_models/en/vctk/vits", voice="p270")
+
+------------
+play_media()
+------------
+The play_media call plays a media file.
+
+.. code-block:: python
+
+   play_media(file, delete_on_complete, media_type)
+
+   # required
+   file - the file to play.
+
+   # optional
+   delete_on_complete - if True will delete the file after it has been played
+   media_type - 'wav', 'mp3', or 'stream_vlc'
+
+**Examples:**
+
+.. code-block:: python
+
+   self.play_media(uri, False, 'stream_vlc')
+
+----------------
+get_user_input()
+----------------
+The get_user_input call waits for a user utterance and either calls the user
+provided callback method with the user input, or it calls the user supplied
+timeout method if a timeout occurs. 
+
+.. code-block:: python
+
+   get_user_input(callback, prompt, timeout_callback)
+
+   # required
+   callback - the method to call with the user utterance.
+
+   # optional
+   prompt - if present will be spoken first
+   timeout_callback - if provided will be called if a timeout is reached
+
+**Examples:**
+
+.. code-block:: python
+
+   self.get_user_input( self.handle_user_input,
+                        "Who are you?",
+                        self.handle_user_input_timeout )
+
+
+-----------------------
+get_user_confirmation()
+-----------------------
+The get_user_confirmation call is a special case of the 
+get_user_input call. When the user callback is invoked it is provided with
+either the string 'yes' or the string 'no' based on the user's response. 
+
+.. code-block:: python
+
+   get_user_confirmation(callback, prompt, timeout_callback)
+
+   # required
+   callback - the method to call with the user utterance.
+
+   # optional
+   prompt - if present will be spoken first
+   timeout_callback - if provided will be called if a timeout is reached
+
+**Examples:**
+
+.. code-block:: python
+
+   self.get_user_fonfirmation( self.handle_user_input,
+                        "Confirm you want to do bla.",
+                        self.handle_user_input_timeout )
+
+
+--------------
+send_message()
+--------------
+Sends a **'skill'** message on the bus to the target skill id. Note, message must be a dict.
+
+.. code-block:: python
+
+   send_message(target, message)
+
+   # required
+   target - the endpoint target bus identifier. also known as a skill id.
+   message - a dict to be sent on the bus.
+
+
+**Examples:**
+
+.. code-block:: python
+
+   message = {'subtype':'arbitrary_value',
+              'skill_data':'testing one two three'}
+   self.send_message('some_skill', message)
+
+   self.send_message('some_skill', {'test':'123'})
+
+
+-----------------
+register_intent()
+-----------------
+Bind a sentence type, subject and verb to a callback.
+Ultimately sends a message on the bus to the intent service.
+
+.. code-block:: python
+   
+   register_intent(intent_type, verb, subject, callback):
+
+   # required
+   intent_type - 'C' for command or 'Q' for question
+   verb - the verb to match
+   subject - the subject to match
+   callback - method to be called on an intent match
+
+
+**Examples:**
+
+.. code-block:: python
+
+   class TimeSkill(PriVoice):
+       def __init__(self, bus=None, timeout=5):
+           super().__init__(skill_id='time_skill', skill_category='system')
+
+           self.register_intent('Q', 'what', 'time', self.handle_time_match)
+           self.register_intent('Q', 'what', 'date', self.handle_date_match)
+           self.register_intent('Q', 'what', 'today', self.handle_date_match)
+           self.register_intent('Q', 'what', 'day', self.handle_day_match)
+
+
+-------------
+sync_listen()
+-------------
+Wait for user input. Returns a string representing the user's utterance, or an
+empty string on a timeout. 
+
+.. code-block:: python
+   
+   sync_listen()
+
+   # optional
+   prompt - if present will be played first
+
+
+**Examples:**
+
+.. code-block:: python
+
+   user_input = self.sync_listen()
+
+   user_input = self.sync_listen("Who are you?")
+
+   say = "Say hello"
+   user_input = self.sync_listen(say)
+
 
 Note: you must set the sync flag in the super constructor to True if you use either of the "sync" methods (sync_speak and sync_listen).
 
@@ -261,14 +476,4 @@ Skills which inherit from the Media skill have to implement these additional met
 
 
 See the radio skill source code for an example of a media skill.
-
-===============
-Advanced Topics
-===============
-+ Skill Categories
-+ Changing the TTS Voice
-+ Registering Intents
-+ Getting User Input
-+ The Message Bus
-+ Synchronous Versus Asynchronous Skills
 

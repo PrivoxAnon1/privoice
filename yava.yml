@@ -3,20 +3,66 @@
     InputDeviceId: '0'
     InputLevelControlName: ''
     LogLevel: i
-    NLP:
-      UseRemote: n
     OutputDeviceName: ''
     OutputLevelControlName: ''
     Platform: l
+
+    NLP:
+      UseRemote: n
+
     STT:
       UseRemote: n
+      SyncListenTimeout: 10
+
     TTS:
       Local: e
       Remote: p
       UseRemote: n
+      SyncSpeakTimeout: 10
+      Engine: 'coqui'
+      Model: 'tts_models/en/vctk/vits'
+      Voice: 'p236'
+      #Voice: 'p270'
+
+    Recognizer:
+      # vad mode controls silence 
+      # detection sensitivity. 
+      # 1=loose, 3=tight
+      VadMode: 1
+        
+      # least number of bytes required to
+      # be considered a valid utterance
+      # warning, too short and you will 
+      # things like 'stop' and 'up'
+      MinUtteranceBytes: 9600
+
+      # the whisper model
+      ModelName: 'small.en'
+
+      # how long to allow the transcriber to
+      # try to transcribe before we kill it.
+      # note this is the longest utterance
+      # you can transcribe. 
+      # combined these two mean 3.5 seconds
+      ResetTimeoutCounter: 35
+      ResetSleepTime: 0.1
+
+    Interpreter:
+      # how long we will stay in wake word detected
+      # state before we assume no more input and 
+      # revert to the idle state
+      WatchdogTimeout: 5
+
+      # the number of words in from the start of the
+      # utterance we look for the wake word. for
+      # example, if the wake word is 'computer',
+      # 'tell me computer' or 'riddle me this computer'
+      # or 'computer' or 'hey computer' would all match
+      WakeWordReach: 5
   Basic:
     BaseDir: /home/ken/PriVoice/
-    Version: 1.0.0
+    Version: 0.0.1
     WakeWords:
     - hey computer
     - computer
+

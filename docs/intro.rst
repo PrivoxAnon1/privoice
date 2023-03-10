@@ -6,6 +6,7 @@ Introduction
 
 
 PriVoice is a full featured, privacy respecting, open source voice assistant.
+It is comparable to products like Alexa and Suri with several key differences.
 
 + Runs locally with no network connection required.
 + Privacy respecting, secure operation. No data leaves your system.
