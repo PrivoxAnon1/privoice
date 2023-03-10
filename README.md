@@ -1,5 +1,10 @@
 # PriVoice - a privacy respecting voice assistant
 
+Note:
+
+Official Documentation may be found at https://privoice.readthedocs.io
+
+
 Overview
 --------
 
