@@ -18,5 +18,6 @@ Index
    user_guide
    skills
    developer
+   intent
    configuration
 

@@ -4,6 +4,12 @@ Install PriVoice
 .. toctree::
    :maxdepth: 2
 
+
+.. _installation:
+
+============
+Installation
+============
 Note PriVoice currently only runs on a linux system. You can run it
 on systems like the Raspberry Pi but it is recommended you run PriVoice
 on a reasonable hardware platform with decent quality audio (mic and
@@ -110,4 +116,12 @@ Hit Ctl+C at any time to exit the program.
 ------------------
 Operational Issues
 ------------------
+The output shown above lists several important values. First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
+
+From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.
+
+
+
+
+
 

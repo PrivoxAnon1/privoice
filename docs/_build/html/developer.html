@@ -14,7 +14,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="System Configuration" href="configuration.html" />
+    <link rel="next" title="Intent Processing" href="intent.html" />
     <link rel="prev" title="Creating Skills" href="skills.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -38,21 +38,142 @@
 </div>
 <section id="theory-of-operation">
 <h2>Theory of Operation<a class="headerlink" href="#theory-of-operation" title="Permalink to this heading">¶</a></h2>
+<p>The system takes input via the microphone using the ‘arecord’ utility piped out to the speech recognizer.
+The file <em>framework/services/recognizer/recognizer.sh</em> demonstrates how this is accomplished.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>arecord<span class="w"> </span>-f<span class="w"> </span>s16_le<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span><span class="w"> </span>-r<span class="w"> </span><span class="m">16000</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>python<span class="w"> </span>-W<span class="w"> </span>ignore<span class="w"> </span>framework/services/recognizer/recognizer.py
+</pre></div>
+</div>
+<p>The result of this audio input being fed to the recognizer is a series of raw messages sent out the
+message bus with the target being the intent service.</p>
+<p>The intent service converts raw messages to qualified messages. These are ultimately sent to several
+destinations. The system skill receives out of band messages (‘stop’, ‘start’, ‘pause’, ‘resume’, etc).
+The fallback skill receives messages that don’t match an intent and an individual skill may receive a
+message from the intent service if an intent match is detected.</p>
 </section>
 <section id="channel-focus">
 <h2>Channel Focus<a class="headerlink" href="#channel-focus" title="Permalink to this heading">¶</a></h2>
+<p>The system manages the synchronization of resources between skills. The speaker is considered the output
+channel while the microphone is considered the input channel and the assumption is there will be contention
+among multiple skills for these resources whose access must be serialized.</p>
+<p>This is all handled in the base skill code (<em>pvx_base.py</em>) and the skill developer does not need to worry
+about this as it all happens in the skill base class automagically.</p>
+<p>The skill base class relies on the system skill to accomplish this using ‘request_focus’ messages. The
+system skill manages access to these resources as descibed in the following section.</p>
 </section>
 <section id="skill-interactions">
 <h2>Skill Interactions<a class="headerlink" href="#skill-interactions" title="Permalink to this heading">¶</a></h2>
+<p>All skills fall into one of four categories</p>
+<ul class="simple">
+<li><p>system</p></li>
+<li><p>user</p></li>
+<li><p>qna</p></li>
+<li><p>media</p></li>
+</ul>
+<p>The system skill makes the focus determination based on the categories of
+the skills involved. This happens in the file ‘skills/system_skills/skill_system.py’
+in the method named ‘output_focus_determination()’.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">last_active_skill_category</span> <span class="o">==</span> <span class="s1">&#39;media&#39;</span><span class="p">:</span>
+    <span class="c1"># media skills are paused by everything</span>
+    <span class="c1"># except a new media request which will</span>
+    <span class="c1"># terminate the previous media skill</span>
+    <span class="k">if</span> <span class="n">new_skill_cat</span> <span class="o">==</span> <span class="s1">&#39;media&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;cancel&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;pause&#39;</span>
+
+<span class="k">if</span> <span class="n">last_active_skill_category</span> <span class="o">==</span> <span class="s1">&#39;qna&#39;</span><span class="p">:</span>
+    <span class="c1"># qna skills are paused by everything except</span>
+    <span class="c1"># media skills which terminate them</span>
+    <span class="k">if</span> <span class="n">new_skill_cat</span> <span class="o">==</span> <span class="s1">&#39;media&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;cancel&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;pause&#39;</span>
+
+<span class="k">if</span> <span class="n">last_active_skill_category</span> <span class="o">==</span> <span class="s1">&#39;user&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">new_skill_cat</span> <span class="o">==</span> <span class="s1">&#39;system&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;pause&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;cancel&#39;</span>
+
+<span class="k">return</span> <span class="s1">&#39;deny&#39;</span>
+</pre></div>
+</div>
 </section>
 <section id="out-of-band-processing">
 <h2>Out of Band Processing<a class="headerlink" href="#out-of-band-processing" title="Permalink to this heading">¶</a></h2>
+<p>An out of band message is a message which requires processing outside the normal
+process flow. For example, if the user says “stop” this is considered a meta input
+and it requires special processing rather than just sending it to the currently
+active skill.</p>
+<p>Out of Band (OOB) messages are produced by the intent service and sent to the system skill.
+The system skill uses its overall knowledge of which skills are currently active,
+waiting on input, etc. to determine what to do with the OOB message.</p>
+<p>The system skill also allows other skills to register to receive out of band messages and
+they may even create and register for new ones, so for example if a skill wanted to receive
+all user input that started with ‘halt foo’, it could register ‘halt foo’ with the system
+skill as an out of band and it will receive a message when that utterance is recognized.</p>
+</section>
+<section id="skill-input-processing">
+<h2>Skill Input Processing<a class="headerlink" href="#skill-input-processing" title="Permalink to this heading">¶</a></h2>
+<p>When a skill requests user input this translates to a request to the system skill to acquire
+input channel focus. The way the system handles this is it sends the next raw input it
+receives to the skill. It shoudl be noted this happens <strong>after</strong> the normal process flow.</p>
+<p>This means even though the skill currently in control of the input channel ultimately
+receives the raw input, the input still goes though the normal audio input process which
+attempts to intent, handle OOBs, etc.</p>
+<p>A side effect of this, is if a skill is waiting for a user input which might be the word
+stop (for example, “tell me user should i stop or start”), it will receive a ‘stop’ message
+<strong>before</strong> it receives the user utterance. It is up to the skill to handle this edge case
+which is easily accomplished with a stateful variable.</p>
 </section>
 <section id="the-hal">
 <h2>The HAL<a class="headerlink" href="#the-hal" title="Permalink to this heading">¶</a></h2>
+<p>The system requires two audio components to be operational. A microphone for user input
+and a speaker for user output. A headset works best and the system does not handle poor
+AEC or other audio issues very well. As a result, it is recommended it is run on an
+adequate system. The <a class="reference internal" href="install.html#installation"><span class="std std-ref">Installation</span></a> section describes how to determine this.</p>
+<p>The directory ‘framework/hal’ contains all the code that is system/environment specific.
+From a high level the system only needs to know how to change the volume, however, it also
+allows for an initialization call and similar functionality for the microphone. As a result
+the hal.cfg file contains an object for each environment. This object contains the command
+to initialize the audio system if necessary (in most cases not needed), to get and set the
+volume and to get and set the microphone level.</p>
+<p>The system relies on the ‘amixer’ command to accomplish these functions and
+as a result, determining the ‘amixer’ channel names bcomes the issue for systems which do
+not work out of the box using the default values.</p>
+<p>For example, here is how the system sets the speaker volume on one linux system.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>amixer<span class="w"> </span>sset<span class="w"> </span>Playback<span class="w"> </span><span class="m">20</span>%
+</pre></div>
+</div>
+<p>Most issues will arise from knowing the proper values to set for playback and record. The
+‘test/’ directory contains two scripts to help with this issue.</p>
+<ul class="simple">
+<li><p>find_volume_control.py</p></li>
+<li><p>list_input_devices.py</p></li>
+</ul>
+<p>See ‘framework/hal/README’ for additional information.</p>
 </section>
 <section id="the-message-bus">
 <h2>The Message Bus<a class="headerlink" href="#the-message-bus" title="Permalink to this heading">¶</a></h2>
+<p>The message bus is a simple <strong>web socket server</strong> and associated client related code. It may be
+found in the ‘bus/’ directory and provides a bridging mechanism to support both synchronous
+and asynchronous operation. By default skills are assumed to be asyncio clients and behave in
+a manner consistent with the Python asyncio protocol. Asyncio is a typical voluntary ELOS (enormous
+loop operating system), ala MS Windows which relies on the concept of a well-behaved program.</p>
+<p>A by-product of this is that non-well-behaved programs can starve themselves off of input messages
+and render themselves inoperable.</p>
+<p>Asyncio is an acquired taste and can present a daunting challenge to an entry level Python programmer.</p>
+<p>To mitigate this, the system provides a skill with the ability to identify itself as a synchronous skill.
+Synchronous skills uses the methods ‘sync_speak’ and ‘sync_listen’ rather than their async counterparts.</p>
+<p>Synchronous skills must set their <em>sync</em> flag to True in their super constructor like this</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">skill_id</span> <span class="o">=</span> <span class="s1">&#39;my_skill&#39;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">skill_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">skill_id</span><span class="p">,</span> <span class="n">skill_category</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The message bus is a targeted bus and messages are not broadcast to all endpoints. The downside to
+this is a system monitor which could see all messages, even those not destined for it, and so this
+is accomplished in the socket server by sending out all messages to the special endpoint named
+‘system_monitor’.</p>
 </section>
 </section>
 
@@ -83,10 +204,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#channel-focus">Channel Focus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skill-interactions">Skill Interactions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#out-of-band-processing">Out of Band Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skill-input-processing">Skill Input Processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-hal">The HAL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-message-bus">The Message Bus</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="intent.html">Intent Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>
 </ul>
 
@@ -95,7 +218,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="skills.html" title="previous chapter">Creating Skills</a></li>
-      <li>Next: <a href="configuration.html" title="next chapter">System Configuration</a></li>
+      <li>Next: <a href="intent.html" title="next chapter">Intent Processing</a></li>
   </ul></li>
 </ul>
 </div>

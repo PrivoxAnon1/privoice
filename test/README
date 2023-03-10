@@ -1,0 +1,8 @@
+
+In most cases arecord and aplay should suffice, however, if they don't then you will need to determine the following values.
+
+1. Output Device Name
+2. Output Mixer Control Name
+3. Input Mixer Control Name
+
+

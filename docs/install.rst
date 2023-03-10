@@ -4,6 +4,12 @@ Install PriVoice
 .. toctree::
    :maxdepth: 2
 
+
+.. _installation:
+
+============
+Installation
+============
 Note PriVoice currently only runs on a linux system. You can run it
 on systems like the Raspberry Pi but it is recommended you run PriVoice
 on a reasonable hardware platform with decent quality audio (mic and

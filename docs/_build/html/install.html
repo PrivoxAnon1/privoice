@@ -36,6 +36,8 @@
 <h1>Install PriVoice<a class="headerlink" href="#install-privoice" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<section id="installation">
+<span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
 <p>Note PriVoice currently only runs on a linux system. You can run it
 on systems like the Raspberry Pi but it is recommended you run PriVoice
 on a reasonable hardware platform with decent quality audio (mic and
@@ -44,6 +46,7 @@ and text to speech locally though solutions do exist.</p>
 <p>If your system is hardware constrained and can not run the voice
 assistant locally you should consider using standard http post
 commands leveraging the Privox Cloud based voice network.</p>
+</section>
 <section id="verify-system">
 <h2>Verify System<a class="headerlink" href="#verify-system" title="Permalink to this heading">¶</a></h2>
 <p>Before getting started it is a good idea to make sure you have a properly
@@ -114,6 +117,8 @@ BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<sp
 <p>Hit Ctl+C at any time to exit the program.</p>
 <section id="operational-issues">
 <h3>Operational Issues<a class="headerlink" href="#operational-issues" title="Permalink to this heading">¶</a></h3>
+<p>The output shown above lists several important values. First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string.</p>
+<p>From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.</p>
 </section>
 </section>
 </section>
@@ -138,6 +143,7 @@ BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<sp
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Install PriVoice</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verify-system">Verify System</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#install">Install</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installation-issues">Installation Issues</a></li>
@@ -152,6 +158,7 @@ BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<sp
 <li class="toctree-l1"><a class="reference internal" href="user_guide.html">User’s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skills.html">Creating Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intent.html">Intent Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>
 </ul>
 

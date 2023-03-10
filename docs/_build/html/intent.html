@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Intent Processing &#8212; PriVoice 1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="System Configuration" href="configuration.html" />
+    <link rel="prev" title="Developer Guide" href="developer.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="intent-processing">
+<h1>Intent Processing<a class="headerlink" href="#intent-processing" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p id="id1">Intent processing is the process of matching up an <em>endpoint</em> with an input utterance.
+An <em>input utterance</em> is the text produced by the speech to text (STT) process and is a
+result of what is provided to the audio input channel which in most cases is the microphone.</p>
+<p>Input utterance messages are presented on the message bus as <strong>raw</strong> messages sent to the
+intent service. The intent service forwards them onto the interpreter function.
+The interpreter takes in raw text messages and converts them to one of four message types</p>
+<ul class="simple">
+<li><p>Q_OOB  - qualified out of band (example - computer stop)</p></li>
+<li><p>U_OOB  - unqualified out of band (example - stop)</p></li>
+<li><p>Q_UTT  - qualified utterance (computer what time is it)</p></li>
+<li><p>WW     - wake word detected (just the wake word, not the ww + utt, that is msg Q_UTT)</p></li>
+</ul>
+<p>It should be noted this code is triggered by a RAW message and it does not repeat this message.
+This code is basically a simple stateful stream parser designed to handle the concept of a
+wake word (which can time out) and out of band (OOB) utterances.</p>
+<p>Out of band processing is handled by the system skill and is described in more detail on
+the Developer page.</p>
+<p>A <em>qualified utterance</em> (Q_UTT) is an utterance which is either preceeded by the wake word (or wake
+word phrase) or was received while the interpreter was in the <em>activated</em> state. The activated
+state is a period of time from when the user speaks the wake word in isolation, to when the
+time out period is reached. All of these parameters are available in the ‘yava.yml’ configuration
+file in the base directory.</p>
+<p>Qualified utterances are divided into one of three utterance types</p>
+<ul class="simple">
+<li><p>Question</p></li>
+<li><p>Command</p></li>
+<li><p>Informational</p></li>
+</ul>
+<p>Informational utterances are ignored. Questions and commands are parsed using a natural language
+approach which produces among other things the recognized ‘subject’ and ‘verb’ if they exist.</p>
+<p>These are then used to determine if an <em>endpoint intent match</em> exists. If one exists, a message is sent
+to the matched endpoint along with all known information about the utterance. If no intent is matched
+a message is sent to the endpoint registered on the message bus as the ‘fallback skill’.</p>
+<section id="intents">
+<h2>Intents<a class="headerlink" href="#intents" title="Permalink to this heading">¶</a></h2>
+<p>It is possible to derive <strong>intent</strong> from <em>input utterances</em> in many different ways. For example,
+we could simply have a piece of code which looked like this in our intent processor</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">utterance</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;boo&#39;</span><span class="p">):</span>
+    <span class="n">send_msg_to_boo</span><span class="p">(</span><span class="n">utterance</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">send_msg_to_hoo</span><span class="p">(</span><span class="n">utterance</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We could also use a regular expression to match an input utterance to an endpoint</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;boo&quot;</span><span class="p">,</span> <span class="n">utterance</span><span class="p">):</span>
+    <span class="n">send_msg_to_boo</span><span class="p">(</span><span class="n">utterance</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">send_msg_to_hoo</span><span class="p">(</span><span class="n">utterance</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>PriVoice uses the utterance <strong>type</strong>, the utterance <strong>subject</strong> and the utterance <strong>verb</strong>
+to match an input utterance to an endpoint. It does so by allowing endpoints to register
+intents (the combination of type, subject and verb) and when that intent is matched a message
+is sent to the associated endpoint.</p>
+<p>It should be noted the intent service is a first come first serve service and it will reject
+duplicate intent (also known as <strong>intent clash</strong>) registration requests.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PriVoice</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install PriVoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">Creating Skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Intent Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intents">Intents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="developer.html" title="previous chapter">Developer Guide</a></li>
+      <li>Next: <a href="configuration.html" title="next chapter">System Configuration</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Anon1.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/intent.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
