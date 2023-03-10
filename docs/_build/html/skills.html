@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Creating Skills &#8212; PriVoice 1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Guide" href="developer.html" />
+    <link rel="prev" title="User’s Guide" href="user_guide.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="creating-skills">
+<h1>Creating Skills<a class="headerlink" href="#creating-skills" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="skills">
+<span id="id1"></span><h2>Skills<a class="headerlink" href="#skills" title="Permalink to this heading">¶</a></h2>
+<p>PriVoice skills are simple Python programs that run in their own
+virtual environment using their own Python interpreter. This level
+of isolation ensures skills don’t interfere with each other.</p>
+<p>If skills need to communicate they should do so using the message
+bus. The message bus is a simple websocket server and the send_msg()
+command is built into all PriVoice skills.</p>
+<section id="hello-world">
+<h3>Hello World<a class="headerlink" href="#hello-world" title="Permalink to this heading">¶</a></h3>
+<p>Open your terminal and change into the skills/user_skills directory.
+Create a new directory named privoice_hello and then change into that
+new directory.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>skills/user_skills
+mkdir<span class="w"> </span>privoice_hello
+<span class="nb">cd</span><span class="w"> </span>privoice_hello
+</pre></div>
+</div>
+<p>Create a file named skill.json. It should look like this …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
+<span class="w">     </span><span class="s2">&quot;skill_id&quot;</span>:<span class="s2">&quot;hello_skill&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;name&quot;</span>:<span class="s2">&quot;hello skill&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;requires_internet&quot;</span>:<span class="w"> </span><span class="s2">&quot;no&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;description&quot;</span>:<span class="s2">&quot;Hello World skill.&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;search_terms&quot;</span>:<span class="o">[</span><span class="s2">&quot;hello&quot;</span>,<span class="w"> </span><span class="s2">&quot;hi&quot;</span><span class="o">]</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Finally, create a file named init.py and put this in it …</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">skills.pvx_base</span> <span class="kn">import</span> <span class="n">PriVoice</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">HelloSkill</span><span class="p">(</span><span class="n">PriVoice</span><span class="p">):</span>
+<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="linenos"> 6</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">skill_id</span><span class="o">=</span><span class="s1">&#39;hello_skill&#39;</span><span class="p">,</span> <span class="n">skill_category</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+<span class="linenos"> 7</span>        <span class="bp">self</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s2">&quot;Hello World.&quot;</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<span class="linenos">10</span>        <span class="c1">#print(&quot;\n*** Do nothing stop hit ***\n&quot;)</span>
+<span class="linenos">11</span>        <span class="k">pass</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="linenos">14</span>    <span class="n">hs</span> <span class="o">=</span> <span class="n">HelloSkill</span><span class="p">()</span>
+<span class="linenos">15</span>    <span class="n">Event</span><span class="p">()</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>  <span class="c1"># Wait forever</span>
+</pre></div>
+</div>
+<p>Now change back to the base PriVoice directory</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>../../..
+</pre></div>
+</div>
+<p>Stop PriVoice if it was previously running.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/privoice_stop.sh
+</pre></div>
+</div>
+<p>and restart it so it picks up your new skill.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/privoice_stop.sh
+</pre></div>
+</div>
+<p>You should hear your skill say “hello world” when it is loaded.</p>
+<p>Obviously this is a contrived example but it demonstrates how
+simple it is to create and deploy a new skill.</p>
+<p>In the next section we will create a local skill repository which
+is just a directory that contains skills, and we will use the built
+in skill manager to install and run our skills.</p>
+</section>
+<section id="creating-a-local-repository">
+<h3>Creating a Local Repository<a class="headerlink" href="#creating-a-local-repository" title="Permalink to this heading">¶</a></h3>
+<p>Open your terminal and create a directory somewhere on your file system.
+For example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">pwd</span>
+/home/anon1
+
+$<span class="w"> </span>mkdir<span class="w"> </span>my_repo
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>my_repo
+$<span class="w"> </span><span class="nb">pwd</span>
+/home/anon1/my_repo
+</pre></div>
+</div>
+<p>Later we will add this local repository to our configuration file.</p>
+<p>This is our new local repository. We will put our new skills in here.
+To create a new skill …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mkdir<span class="w"> </span>privoice_my_skill
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>privoice_my_skill
+</pre></div>
+</div>
+<p>Now create a file named skill.json. It should look like this …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
+<span class="w">     </span><span class="s2">&quot;skill_id&quot;</span>:<span class="s2">&quot;my_skill&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;name&quot;</span>:<span class="s2">&quot;my skill&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;requires_internet&quot;</span>:<span class="w"> </span><span class="s2">&quot;no&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;description&quot;</span>:<span class="s2">&quot;My first skill.&quot;</span>,
+<span class="w">     </span><span class="s2">&quot;search_terms&quot;</span>:<span class="o">[</span><span class="s2">&quot;my&quot;</span>,<span class="w"> </span><span class="s2">&quot;mine&quot;</span>,<span class="w"> </span><span class="s2">&quot;me&quot;</span><span class="o">]</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Finally, create a file named init.py and put this in it …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>from<span class="w"> </span>skills.pvx_base<span class="w"> </span>import<span class="w"> </span>PriVoice
+from<span class="w"> </span>threading<span class="w"> </span>import<span class="w"> </span>Event
+
+class<span class="w"> </span>MySkill<span class="o">(</span>PriVoice<span class="o">)</span>:
+<span class="w">    </span>def<span class="w"> </span>__init__<span class="o">(</span>self,<span class="w"> </span><span class="nv">bus</span><span class="o">=</span>None,<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span><span class="m">5</span><span class="o">)</span>:
+<span class="w">        </span>super<span class="o">()</span>.__init__<span class="o">(</span><span class="nv">skill_id</span><span class="o">=</span><span class="s1">&#39;my_skill&#39;</span>,<span class="w"> </span><span class="nv">skill_category</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="o">)</span>
+
+<span class="w">        </span>self.register_intent<span class="o">(</span><span class="s1">&#39;Q&#39;</span>,<span class="w"> </span><span class="s1">&#39;what&#39;</span>,<span class="w"> </span><span class="s1">&#39;my skill&#39;</span>,<span class="w"> </span>self.handle_what<span class="o">)</span>
+<span class="w">        </span>self.register_intent<span class="o">(</span><span class="s1">&#39;Q&#39;</span>,<span class="w"> </span><span class="s1">&#39;who&#39;</span>,<span class="w"> </span><span class="s1">&#39;my skill&#39;</span>,<span class="w"> </span>self.handle_who<span class="o">)</span>
+<span class="w">        </span>self.register_intent<span class="o">(</span><span class="s1">&#39;C&#39;</span>,<span class="w"> </span><span class="s1">&#39;help&#39;</span>,<span class="w"> </span><span class="s1">&#39;my skill&#39;</span>,<span class="w"> </span>self.handle_help<span class="o">)</span>
+
+<span class="w">    </span>def<span class="w"> </span>handle_who<span class="o">(</span>self,<span class="w"> </span>msg<span class="o">)</span>:
+<span class="w">        </span>self.speak<span class="o">(</span><span class="s2">&quot;I am my skill.&quot;</span><span class="o">)</span>
+
+<span class="w">    </span>def<span class="w"> </span>handle_what<span class="o">(</span>self,<span class="w"> </span>msg<span class="o">)</span>:
+<span class="w">        </span>self.speak<span class="o">(</span><span class="s2">&quot;My skill is my first skill.&quot;</span><span class="o">)</span>
+
+<span class="w">    </span>def<span class="w"> </span>handle_help<span class="o">(</span>self,<span class="w"> </span>msg<span class="o">)</span>:
+<span class="w">        </span>self.speak<span class="o">(</span><span class="s2">&quot;You asked for help with my skill.&quot;</span><span class="o">)</span>
+
+<span class="w">    </span>def<span class="w"> </span>stop<span class="o">(</span>self,<span class="w"> </span>msg<span class="o">)</span>:
+<span class="w">        </span><span class="c1">#print(&quot;\n*** Do nothing stop hit ***\n&quot;)</span>
+<span class="w">        </span>pass
+
+<span class="k">if</span><span class="w"> </span><span class="nv">__name__</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;__main__&#39;</span>:
+<span class="w">    </span><span class="nv">ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>MySkill<span class="o">()</span>
+<span class="w">    </span>Event<span class="o">()</span>.wait<span class="o">()</span><span class="w">  </span><span class="c1"># Wait forever</span>
+</pre></div>
+</div>
+<p>Finally, add the new repository to the skill manager repositories json file.
+It is located in framework/services/skill_mamager/repositories.json.</p>
+<p>Edit this file to point to your new repository. Change the values MYHOME and MYREPO</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>
+
+<span class="o">{</span><span class="w"> </span><span class="s2">&quot;repo_name&quot;</span>:<span class="s2">&quot;Privox Approved Skills&quot;</span>,<span class="w"> </span><span class="s2">&quot;repo_uri&quot;</span>:<span class="s2">&quot;https://github.com/PrivoxAnon1/privox.git&quot;</span>,<span class="w"> </span><span class="s2">&quot;repo_description&quot;</span>:<span class="s2">&quot;Privox provided skills&quot;</span><span class="w"> </span><span class="o">}</span>,
+
+<span class="o">{</span><span class="w"> </span><span class="s2">&quot;repo_name&quot;</span>:<span class="s2">&quot;Local Skills&quot;</span>,<span class="w"> </span><span class="s2">&quot;repo_uri&quot;</span>:<span class="s2">&quot;/home/MYHOME/MYREPO/&quot;</span>,<span class="w"> </span><span class="s2">&quot;repo_description&quot;</span>:<span class="s2">&quot;User provided local skills&quot;</span><span class="w"> </span><span class="o">}</span>
+
+<span class="o">]</span>
+</pre></div>
+</div>
+<p>The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills.</p>
+</section>
+</section>
+<section id="skill-api">
+<h2>Skill API<a class="headerlink" href="#skill-api" title="Permalink to this heading">¶</a></h2>
+<p>The ‘example1’ skill located in the user_skills/ directory is a good example
+of how a basic skill can communicate with the user. The time and date skill
+is an example of a minimalistic user skill.</p>
+<p>All skills that inherit from the PriVoice class have the following methods available.</p>
+<ul class="simple">
+<li><p>speak(text [, wait_callback, engine, model, voice])</p></li>
+<li><p>play_media(file_uri [, delete_on_complete])</p></li>
+<li><p>converse(timeout)</p></li>
+<li><p>get_user_input()</p></li>
+<li><p>get_confirmation()</p></li>
+<li><p>send_message(message)</p></li>
+<li><p>register_intent(intent_type, verb, subject, callback)</p></li>
+<li><p>sync_speak(text [, wait_callback, engine, model, voice])</p></li>
+<li><p>sync_listen(prompt)</p></li>
+</ul>
+<p>Note: you must set the sync flag in the super constructor to True if you use either of the “sync” methods (sync_speak and sync_listen).</p>
+</section>
+<section id="q-a-skills">
+<h2>Q&amp;A Skills<a class="headerlink" href="#q-a-skills" title="Permalink to this heading">¶</a></h2>
+<p>Q&amp;A skills are skills which respond to questions that do not match an intent.
+For example, the question “Who was Abraham Lincoln” will not match any intent
+and it will fall through to the fallback skill which will send out a request to all
+registered Q&amp;A skills to see which one will ultimately handle the request.</p>
+<p>This decision will be based on the confidence level the skill sends back to
+the fallback skill when it sends out the question. The fallback skill will
+award the work to the skill which responded with the highest confidence level.</p>
+<p>Q&amp;A Skills additionally have to implement …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>def<span class="w"> </span>get_qna_confidence<span class="o">(</span><span class="w"> </span>msg<span class="w"> </span><span class="o">)</span>
+And
+def<span class="w"> </span>qna_answer_question<span class="o">(</span><span class="w"> </span>msg<span class="w"> </span><span class="o">)</span>
+</pre></div>
+</div>
+<p>get_qna_confidence takes in a question and responds with the confidence
+level the skill believes has in its ability to answer the question.</p>
+<p>qna_answer_question takes in the question and produces the output. It is
+called when the Q&amp;A skill is selected by the fallback skill to answer the
+question. This message is only sent to the Q&amp;A skill which responded with
+the highest confidence level.</p>
+<p>This is how the system resolves contention among multiple skills which can
+answer open ended questions like wiki, duck duck go, etc.</p>
+<p>See the wiki skill source code for an example of a Q&amp;A skill.</p>
+</section>
+<section id="media-skills">
+<h2>Media Skills<a class="headerlink" href="#media-skills" title="Permalink to this heading">¶</a></h2>
+<p>Media skills are skills which play some form of media like a wav or mp3 file
+or stream, or even a video.</p>
+<p>The system media skill acts as an arbitrer much like the fallback skill does with
+the Q&amp;A skills, and gathers confidence levels from registered media skills when a
+media type command (play, listen, etc) is recognized.</p>
+<p>The ultimate play message is only sent to the media skill which responded with
+the highest confidence level.</p>
+<p>Skills which inherit from the Media skill have to implement these additional methods</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>def<span class="w"> </span>get_media_confidence<span class="o">(</span><span class="w"> </span>msg<span class="w"> </span><span class="o">)</span>
+And
+def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </span>msg<span class="w"> </span><span class="o">)</span>
+</pre></div>
+</div>
+<p>See the radio skill source code for an example of a media skill.</p>
+</section>
+<section id="advanced-topics">
+<h2>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Skill Categories</p></li>
+<li><p>Changing the TTS Voice</p></li>
+<li><p>Registering Intents</p></li>
+<li><p>Getting User Input</p></li>
+<li><p>The Message Bus</p></li>
+<li><p>Synchronous Versus Asynchronous Skills</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PriVoice</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install PriVoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User’s Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Creating Skills</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#skills">Skills</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hello-world">Hello World</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-local-repository">Creating a Local Repository</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#skill-api">Skill API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#q-a-skills">Q&amp;A Skills</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#media-skills">Media Skills</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-topics">Advanced Topics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="user_guide.html" title="previous chapter">User’s Guide</a></li>
+      <li>Next: <a href="developer.html" title="next chapter">Developer Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Anon1.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/skills.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
