@@ -1,0 +1,16 @@
+[
+
+{
+    "repo_name":"Privox Approved Skills",
+    "repo_uri":"https://github.com/PrivoxAnon1/privox.git",
+    "repo_description":"Privox provided skills"
+},
+
+{
+    "repo_name":"Local Skills",
+    "repo_uri":"/home/MYHOME/PriVoiceSkills/",
+    "repo_description":"Local, user provided skills"
+}
+
+]
+

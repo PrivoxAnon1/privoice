@@ -1,0 +1,151 @@
+
+There are several ways to install your own skill.
+
+First, you can create a pull request and then your skill will be available from the Privox approved skills repo.
+
+Second, you can create your own repository somewhere and edit the repositories.json file (framework/services/skill_manager/repositories.json) and ad your repository URI there. 
+
+Finally, you can install your skill from the local file system. To do this, add an entry to the framework/services/skill_manager/repositories.json file like this ...
+
+        {
+            "repo_name":"My Local Skills",
+            "repo_uri":"/home/joeblow/my_skills/",
+            "repo_description":"My local skills",
+        },
+
+In this case the directory /home/joeblow/my_skills/ should look like this ...
+
+privoice_skill_name/
+	__init__.py
+	skill.json
+
+privoice_skill2_name/
+	__init__.py
+	skill.json
+
+Which offers two skills, skill_name and skill2_name.
+
+The skill.json files should look like this ...
+
+{
+        "skill_id":"my_skillid",
+        "name":"My skill",
+        "description":"Whatever",
+        "search_terms":["me", "myself", "i"]
+}
+
+if you have any special requirements you should add a requirements.txt file. 
+
+When your skill is installed it will have its own cirtual environment created for it.
+Your requirements will be added to the default which includes just enough to connect to the system message bus.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skill Manager Skill
+Has a JSON file of repos
+for each repo there is a JSON file
+    search terms (time, date, default)
+    id (must be unique like pva_time or pva_date)
+    name (privox default date time skill or joe's joke skill)
+    description ''
+    repo URL for git clone
+    
+Is responsible for installing, removing, starting and stopping skills
+This means a skill has a started and stopped state which can be
+externally controlled. This amounts to kill/stop.sh and ./start.sh
+and git clone and rm -Rf /xxx
+
+By default, any skills in the user skills subdirectory are considered
+installed and are started by the skill manager at startup.
+
+Active skills should be a ps auxww handler
+Installed is the subdirectories under skills/user-skills/
+Available is the skill manager JSON file
+
+
+No skills except skill manager exist initially.
+This skill can install, remove, start, stop, skills from the skill repository which is initially a hard coded JSON file. This is a list of skill marketplace objects which include name, url, etc.
+
+Initial Vocabulary
+list available skills
+list installed skills
+list active skills
+list stopped skills (installed - active)
+what skills are installed
+what skills are active
+# note the following are programmtically generated intents.
+
+install <skill name> skill
+install skill <skill name>
+remove <skill name> skill
+remove skill <skill name>
+same for stop and start, etc.
+<skill name> description
+skill description <skill name>
+skill detail <skill name>
+
+Skills have
+    ID
+    Name
+    Search Terms
+    Description
+    Repo URL (can http git clone)
+    
+Install a skill is a git clone ?
+remove/delete is rm -Rf xxx
+start/stop (kill)? Probably need generic skill start/stop
+
+Privox Approved Skill Repositories
+
+Offline skills
+-------------
+Skills that can operate with no internet connection
+1. Time and Date
+2. IP Address
+3. Help
+4. Example
+5. Volume
+6. Alarm
+
+7. Home Assistant
+8. Local Music (includes edge servers like Plex)(later)
+9. Local Wiki (later)
+10. Local Video (later)
+11. Connectivity
+12. Settings
+
+Online Skills
+------------
+Skills that require an internet connection
+1. Weather
+2. Wiki
+3. Radio
+
+4. Duck Duck Go (called by Fallback)
+5. YTMusic
+6. Wolfram Alpha (second common play skill)
+7. Remote Video Services (Prime, Youtube, Tubi, Etc.)
+
+

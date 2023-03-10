@@ -1,0 +1,22 @@
+- Advanced:
+    CrappyAEC: n
+    InputDeviceId: '0'
+    InputLevelControlName: ''
+    LogLevel: i
+    NLP:
+      UseRemote: n
+    OutputDeviceName: ''
+    OutputLevelControlName: ''
+    Platform: l
+    STT:
+      UseRemote: n
+    TTS:
+      Local: e
+      Remote: p
+      UseRemote: n
+  Basic:
+    BaseDir: /home/ken/PriVoice/
+    Version: 1.0.0
+    WakeWords:
+    - hey computer
+    - computer

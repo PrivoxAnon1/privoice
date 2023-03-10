@@ -1,0 +1,6 @@
+{
+	"skill_id":"alarm",
+	"name":"Privox alarm skill",
+	"description":"none yet",
+	"search_terms":["alarm", "timeer", "wake up"]
+}
