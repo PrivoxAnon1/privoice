@@ -34,7 +34,20 @@ cd ../../../../../..
 pip install -U TTS
 
 echo ' '
-echo 'Install Complete'
+echo 'PriVoice Install Complete'
 echo ' '
 echo 'Ended at '
 date
+echo ' '
+echo ' '
+echo 'Installing default skills'
+echo ' '
+
+cd tmp
+git clone https://github.com/PrivoxAnon1/privoice_skills.git
+cp -r privoice_skills/* ../skills/user_skills/.
+cd ..
+echo ' '
+echo 'Default skills installed'
+echo ' '
+
