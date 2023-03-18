@@ -72,14 +72,268 @@ Once it has completed you should see something like this on your screen
 
 .. code-block:: bash
 
-   bla bla bla
-   more bla
-   and finally
+   Successfully uninstalled numba-0.56.4
+   Successfully installed Babel-2.12.1 TTS-0.12.0 Werkzeug-2.2.3 anyascii-0.3.2 audioread-3.0.0 cffi-1.15.1 click-8.1.3 contourpy-1.0.7 coqpit-0.0.17 cycler-0.11.0 cython-0.29.28 dateparser-1.1.7 decorator-5.1.1 docopt-0.6.2 flask-2.2.3 fonttools-4.39.2 fsspec-2023.3.0 g2pkk-0.1.2 gruut-2.2.3 gruut-ipa-0.13.0 gruut-lang-de-2.0.0 gruut-lang-en-2.0.0 inflect-5.6.0 itsdangerous-2.1.2 jamo-0.4.1 jieba-0.42.1 joblib-1.2.0 jsonlines-1.2.0 kiwisolver-1.4.4 librosa-0.8.0 llvmlite-0.38.1 matplotlib-3.7.1 mecab-python3-1.0.5 networkx-2.8.8 nltk-3.8.1 num2words-0.5.12 numba-0.55.2 numpy-1.22.4 packaging-23.0 pandas-1.5.3 pillow-9.4.0 platformdirs-3.1.1 pooch-1.7.0 protobuf-3.19.6 psutil-5.9.4 pycparser-2.21 pynndescent-0.5.8 pyparsing-3.0.9 pypinyin-0.48.0 pysbd-0.3.4 python-crfsuite-0.9.9 python-dateutil-2.8.2 pytz-2022.7.1 pytz-deprecation-shim-0.1.0.post0 pyyaml-6.0 resampy-0.4.2 scikit-learn-1.2.2 scipy-1.10.1 six-1.16.0 soundfile-0.12.1 tensorboardX-2.6 threadpoolctl-3.1.0 torchaudio-2.0.1 trainer-0.0.20 tzdata-2022.7 tzlocal-4.3 umap-learn-0.5.1 unidic-lite-1.0.8
+   PriVoice Install Complete
+   Ended at 
+   Sat Mar 18 03:46:56 PM EDT 2023
+   Installing default skills
+   Cloning into 'privoice_skills'...
+   remote: Enumerating objects: 27, done.
+   remote: Counting objects: 100% (27/27), done.
+   remote: Compressing objects: 100% (24/24), done.
+   remote: Total 27 (delta 0), reused 24 (delta 0), pack-reused 0
+   Receiving objects: 100% (27/27), 162.74 KiB | 1.37 MiB/s, done.
+   Default skills installed
 
 
--------------------
+===================
 Installation Issues
--------------------
+===================
+Installation issues tend to fall into one of several categories; software modules, linux device names or alsa names.
+
+------------
+Device Names
+------------
+If either 'arecord' or 'aplay' are not working you will need to correct this first. These are foundational. 
+Assuming you have hardware and it is working the most likely issue is the .asourdrc file. This can be worked around 
+by setting the device name in the yava.yml file. Finding the correct device name could be a pain. For example here is
+the output of the command 'aplay -L' on my laptop ...
+
+
+.. code-block:: bash
+
+  null
+    Discard all samples (playback) or generate zero samples (capture)
+  default
+    Playback/recording through the PulseAudio sound server
+  samplerate
+    Rate Converter Plugin Using Samplerate Library
+  speexrate
+    Rate Converter Plugin Using Speex Resampler
+  jack
+    JACK Audio Connection Kit
+  oss
+    Open Sound System
+  pulse
+    PulseAudio Sound Server
+  upmix
+    Plugin for channel upmix (4,6,8)
+  vdownmix
+    Plugin for channel downmix (stereo) with a simple spacialization
+  hw:CARD=NVidia,DEV=3
+    HDA NVidia, HDMI 0
+    Direct hardware device without any conversions
+  hw:CARD=NVidia,DEV=7
+    HDA NVidia, HDMI 1
+    Direct hardware device without any conversions
+  hw:CARD=NVidia,DEV=8
+    HDA NVidia, HDMI 2
+    Direct hardware device without any conversions
+  hw:CARD=NVidia,DEV=9
+    HDA NVidia, HDMI 3
+    Direct hardware device without any conversions
+  plughw:CARD=NVidia,DEV=3
+    HDA NVidia, HDMI 0
+    Hardware device with all software conversions
+  plughw:CARD=NVidia,DEV=7
+    HDA NVidia, HDMI 1
+    Hardware device with all software conversions
+  plughw:CARD=NVidia,DEV=8
+    HDA NVidia, HDMI 2
+    Hardware device with all software conversions
+  plughw:CARD=NVidia,DEV=9
+    HDA NVidia, HDMI 3
+    Hardware device with all software conversions
+  hdmi:CARD=NVidia,DEV=0
+    HDA NVidia, HDMI 0
+    HDMI Audio Output
+  hdmi:CARD=NVidia,DEV=1
+    HDA NVidia, HDMI 1
+    HDMI Audio Output
+  hdmi:CARD=NVidia,DEV=2
+    HDA NVidia, HDMI 2
+    HDMI Audio Output
+  hdmi:CARD=NVidia,DEV=3
+    HDA NVidia, HDMI 3
+    HDMI Audio Output
+  dmix:CARD=NVidia,DEV=3
+    HDA NVidia, HDMI 0
+    Direct sample mixing device
+  dmix:CARD=NVidia,DEV=7
+    HDA NVidia, HDMI 1
+    Direct sample mixing device
+  dmix:CARD=NVidia,DEV=8
+    HDA NVidia, HDMI 2
+    Direct sample mixing device
+  dmix:CARD=NVidia,DEV=9
+    HDA NVidia, HDMI 3
+    Direct sample mixing device
+  usbstream:CARD=NVidia
+    HDA NVidia
+    USB Stream Output
+  hw:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Direct hardware device without any conversions
+  plughw:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Hardware device with all software conversions
+  hdmi:CARD=Generic,DEV=0
+    HD-Audio Generic, HDMI 0
+    HDMI Audio Output
+  dmix:CARD=Generic,DEV=3
+    HD-Audio Generic, HDMI 0
+    Direct sample mixing device
+  usbstream:CARD=Generic
+    HD-Audio Generic
+    USB Stream Output
+  hw:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    Direct hardware device without any conversions
+  plughw:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    Hardware device with all software conversions
+  sysdefault:CARD=Generic_1
+    HD-Audio Generic, ALC3254 Analog
+    Default Audio Device
+  front:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    Front output / input
+  surround21:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    2.1 Surround output to Front and Subwoofer speakers
+  surround40:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    4.0 Surround output to Front and Rear speakers
+  surround41:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    4.1 Surround output to Front, Rear and Subwoofer speakers
+  surround50:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    5.0 Surround output to Front, Center and Rear speakers
+  surround51:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    5.1 Surround output to Front, Center, Rear and Subwoofer speakers
+  surround71:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    7.1 Surround output to Front, Center, Side, Rear and Woofer speakers
+  dmix:CARD=Generic_1,DEV=0
+    HD-Audio Generic, ALC3254 Analog
+    Direct sample mixing device
+  usbstream:CARD=Generic_1
+    HD-Audio Generic
+    USB Stream Output
+  usbstream:CARD=acp
+    acp
+    USB Stream Output
+
+Hopefully your output is far less. Regardless, you will need to test each device name until you hit the correct one.
+It should be noted the device name must be derived from the above output by combining some of the output. For example 
+using the device 
+
+.. code-block:: bash
+
+  plughw:CARD=Generic_1,DEV=0
+
+You would test this device as follows 
+
+.. code-block:: bash
+
+  aplay -Dplughw:Generic_1,DEV=0
+
+
+And for the following entry 
+
+.. code-block:: bash
+
+  plughw:CARD=NVidia,DEV=3
+
+You would test this device as follows 
+
+.. code-block:: bash
+
+  aplay -Dplughw:NVidia,DEV=3
+
+----------
+ALSA Names
+----------
+The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the yava.yml file. 
+
+Again, finding the value is often not straightforward. For example, here is some output from my laptop
+
+
+.. code-block:: bash
+
+  $ amixer scontrols
+
+  Simple mixer control 'IEC958',0
+  Simple mixer control 'IEC958',1
+  Simple mixer control 'IEC958',2
+  Simple mixer control 'IEC958',3
+
+  $ amixer -c 0 scontrols
+
+  Simple mixer control 'IEC958',0
+  Simple mixer control 'IEC958',1
+  Simple mixer control 'IEC958',2
+  Simple mixer control 'IEC958',3
+
+  $ amixer -c 1 scontrols
+
+  Simple mixer control 'Mic ACP LED',0
+  Simple mixer control 'IEC958',0
+
+  $ amixer -c 2 scontrols
+
+  Simple mixer control 'Master',0
+  Simple mixer control 'Headphone',0
+  Simple mixer control 'Headphone Mic Boost',0
+  Simple mixer control 'Speaker',0
+  Simple mixer control 'PCM',0
+  Simple mixer control 'Mic ACP LED',0
+  Simple mixer control 'Capture',0
+  Simple mixer control 'Capture',1
+  Simple mixer control 'Auto-Mute Mode',0
+  Simple mixer control 'Digital',0
+  Simple mixer control 'Headset Mic Boost',0
+  Simple mixer control 'Input Source',0
+  Simple mixer control 'Input Source',1
+
+  $ amixer -c 3 scontrols
+
+
+Again, hopefully your system is not quite as complex, but what we are ultimately looking for are the Mic and Speaker control names. 
+In my case the values I am looking for are 'Speaker' and 'Capture'. You can verify by running the 'amixer sget' command like this 
+
+
+.. code-block:: bash
+
+  $ amixer -c 2 sget Speaker
+  Simple mixer control 'Speaker',0
+    Capabilities: pvolume pswitch
+    Playback channels: Front Left - Front Right
+    Limits: Playback 0 - 87
+    Mono:
+    Front Left: Playback 87 [100%] [0.00dB] [on]
+    Front Right: Playback 87 [100%] [0.00dB] [on]
+
+And for the microphone 
+
+.. code-block:: bash
+
+  $ amixer -c 2 sget Capture
+  Simple mixer control 'Capture',0
+    Capabilities: cvolume cswitch
+    Capture channels: Front Left - Front Right
+    Limits: Capture 0 - 63
+    Front Left: Capture 63 [100%] [30.00dB] [off]
+    Front Right: Capture 63 [100%] [30.00dB] [off]
+
+
+----------------
+Software Modules
+----------------
+Typically issues arise from pinned version clash. If you are seeing a module build error you should create a new virtual environment and try to install it in isolation there first.
 
 ===============
 Test and Adjust
@@ -91,7 +345,7 @@ the quality of your hardware. Run the following command from the base directory
 
    . ./scripts/init_env.sh
 
-Yes, that's dot space dot slash. Next run 
+Yes, that's **dot space dot slash**. Next run 
 
 .. code-block:: bash
 
@@ -113,15 +367,62 @@ similar to this
 
 Hit Ctl+C at any time to exit the program.
 
-------------------
+The output shown above lists several important values. 
+
+First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
+
+From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. 
+
+If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.
+
+==================
 Operational Issues
-------------------
-The output shown above lists several important values. First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
+==================
+The STT models require anywhere from approximately 1GB to upwards of 10GB. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch) you will be limited to the GPU RAM. 
 
-From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.
+For example, my laptop has 4GB of GPU RAM, so using the GPU I can only run the small model and under, however, if I disable the GPU I can run any model using my laptop CPU because my laptop has over 16GB of RAM. Using the GPU is about twice as fast on my laptop. You mileage may vary.
 
+In general the 'tiny' model works fine but you can always edit the yava.yml file and change the model. 
 
+STT models have several attributes ...
 
++ Transcription Speed
++ Transcription Accuracy
++ Memory Consumption
 
+To change the model simply change the Recognizer:ModelName value in the yava.yml file. 
+In the output below, the value is set to 'small.en'.
+
+.. code-block:: bash
+
+    Recognizer:
+      # vad mode controls silence
+      # detection sensitivity.
+      # 1=loose, 3=tight
+      VadMode: 1
+
+      # least number of bytes required to
+      # be considered a valid utterance
+      # warning, too short and you will
+      # things like 'stop' and 'up'
+      MinUtteranceBytes: 9600
+
+      # the whisper model
+      ModelName: 'small.en'
+
+      # how long to allow the transcriber to
+
+Supported values are 
+
++ tiny
++ tiny.en
++ base
++ base.en
++ small
++ small.en
++ medium
++ medium.en
++ large
++ large-v2
 
 
