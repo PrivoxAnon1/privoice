@@ -2,7 +2,7 @@ from skills.pvx_base import PriVoice
 from threading import Event
 import os, re
 from framework.util.utils import execute_command, Config
-from framework.hal.hal import Hal
+#from framework.hal.hal import Hal
 
 class VolumeSkill(PriVoice):
     def __init__(self, bus=None, timeout=5):
@@ -88,16 +88,6 @@ class VolumeSkill(PriVoice):
             self.register_intent('Q', question, subject, self.handle_intent_match)
             inactive_state_intents.append( 'Q' + ':' + subject + ':' + question )
 
-
-    """
-    def get_num(self,v1, v2, v3):
-        num = parse.extract_number(v1)
-        if not num:
-            num = parse.extract_number(v2)
-            if not num:
-                num = parse.extract_number(v3)
-        return num
-    """
 
     def get_num(self, v1, v2, v3):
         for num in [v1, v2, v3]:

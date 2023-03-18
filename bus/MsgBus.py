@@ -55,7 +55,7 @@ class Server:
             msg = json.loads(message)
             target = msg.get('target','')
             source = msg.get('source','')
-            #logging.error("sending %s" % (msg,))
+            logging.debug("sending %s" % (msg,))
             if target == '' or source == '':
                 logging.error("Error - Rejected ill formed message. source:%s, target:%s" % (source, target))
                 return False
@@ -67,14 +67,14 @@ class Server:
                 # directed
                 client = await self.find_client(target)
                 if client == None:
-                    logging.warning("Error, target not found! %s, %s" % (target,msg))
+                    logging.warning("Target not found! %s, %s" % (target,msg))
                     return False
 
                 await client.send(message)
 
                 client2 = await self.find_client('system_monitor')
                 if client2 == None:
-                    logging.debug("Warning, system_monitor not found!")
+                    logging.debug("Notice, system_monitor not found!")
                     return False
                 await client2.send(message)
 
@@ -101,9 +101,9 @@ if __name__ == "__main__":
     server = Server()
     # only allow local (on device) access
     #start_server = websockets.serve(server.ws_handler,'localhost',4000)
+
     # allow external devices to access the msg bus
     start_server = websockets.serve(server.ws_handler,'0.0.0.0',4000)
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_server)
     loop.run_forever()

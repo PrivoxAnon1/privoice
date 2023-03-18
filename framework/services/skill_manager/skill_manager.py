@@ -107,13 +107,13 @@ class SkillManager(PriVoice):
                 self.register_intent('C', verb, skill.name, self.handle_start_skill)
 
         # stop/etc 
-        for verb in ['stop', 'cancel', 'terminate', 'shut down', 'shut']:
+        for verb in ['stop', 'cancel', 'terminate', 'shut down', 'halt', 'kill']:
             self.register_intent('C', verb, 'skill', self.handle_stop_skill)
 
         # start/run/restart skill name
         for skill_id in self.available_skills:
             skill = self.get_skill_for_id(skill_id)
-            for verb in ['stop', 'cancel', 'terminate', 'shut down', 'shut']:
+            for verb in ['stop', 'cancel', 'terminate', 'shut down', 'halt', 'kill']:
                 self.register_intent('C', verb, skill.name, self.handle_stop_skill)
 
         self.register_intent('C', 'help', 'skill', self.help)

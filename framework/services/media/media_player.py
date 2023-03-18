@@ -3,7 +3,7 @@ from bus.Message import Message
 from bus.MsgBusClient import MsgBusClient
 import time, os
 from subprocess import Popen, PIPE, STDOUT
-from framework.util.utils import CommandExecutor, LOG, Config, MediaSession, get_hal_obj
+from framework.util.utils import CommandExecutor, LOG, Config, MediaSession
 from framework.message_types import MSG_MEDIA, MSG_SKILL
 
 class PVXMediaPlayerSkill:
@@ -36,7 +36,7 @@ class PVXMediaPlayerSkill:
 
         # states = idle, playing or paused
         self.state = 'idle'
-        self.hal = get_hal_obj('l')
+        #self.hal = get_hal_obj('l')
 
         self.bus.on(MSG_MEDIA, self.handle_message)
 
@@ -488,14 +488,17 @@ class PVXMediaPlayerSkill:
                     self.log.warning("ERROR - derived media type = %s." % (media_type,))
                 else:
                     # else media type is known so use it 
-                    # to get cmd line from hal cfg file
+                    # to get cmd line from supported cmds
 
                     # we currently support wav, mp3, stream using cvlc and 
                     # stream using ytdownload cmd line tool with cvlc
                     # we use the hal to determine the command line for the
                     # actual player so we can support anything
+                    media_cmds = {"mp3":"mpg123 %s", "wav":"aplay %s", "stream_ytdl":"youtube-dl -o - '%s' | vlc -", "stream_vlc":"cvlc --global-key-play-pause='s' %s"}
                     self.current_session.media_type = media_type
-                    media_player_cfg = self.hal.get('play_media', None)
+
+                    #media_player_cfg = self.hal.get('play_media', None)
+                    media_player_cfg = media_cmds
 
                     if media_player_cfg:
                         cmd = media_player_cfg.get(self.current_session.media_type,'')

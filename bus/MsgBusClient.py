@@ -22,7 +22,8 @@ def process_inbound_messages(inbound_q, msg_handlers, skill_id, sync):
         if msg_handlers.get( msg['msg_type'], None ) is not None:
             if sync:
                 # synchronous behavior
-                print("Synchronous Dispatch!")
+                if BARK:
+                    print("Synchronous Dispatch!")
                 threading.Thread(target=msg_handlers[msg['msg_type']], args=(msg,)).start()
             else:
                 msg_handlers[msg['msg_type']]( msg )
@@ -34,33 +35,35 @@ def process_inbound_messages(inbound_q, msg_handlers, skill_id, sync):
 class MsgBusClient:
     def __init__(self, client_id, sync=False):
         if sync:
-            print("** Warning! Synchronous Dispatch Selected for %s **" % (client_id,))
+            if BARK:
+                print("** Warning! Synchronous Dispatch Selected for %s **" % (client_id,))
 
         self.inbound_q = Queue()
         self.outbound_q = Queue()
         self.msg_handlers = {}
         self.client_id = client_id
         self.client = ''
+        self.status = 'Not Connected'
         self.inbound_thread = threading.Thread(target=process_inbound_messages, args=(self.inbound_q, self.msg_handlers, client_id, sync)).start()
         self.connection_thread = self.run_in_thread()
 
     def on_error(self, ws, error):
+        self.status = 'Not Connected'
         if BARK:
-            print("XXXXXXXXXXXXXXXXX ERROR %s = %s" % (self.client_id, error))
+            print("MsgBusClient:Error %s = %s" % (self.client_id, error))
         pass
 
     def on_close(self, ws, close_status_code, close_msg):
+        self.status = 'Not Connected'
         if BARK:
-            print("### WTF? Connection closed !! ### %s" % (self.client_id,))
+            print("MsgBusClient: Connection closed ! %s" % (self.client_id,))
             print("%s ---> %s" % (close_status_code, close_msg))
-            print("### END WTF?")
 
     def on_open(self, ws):
-        #print("### Connection Opened !! ### %s" % (self.client_id,))
+        self.status = 'Connected'
         pass
 
     def connection(self):
-        #print("Create client %s" % (self.client_id,))
         self.client = self.create_client()
         self.client.run_forever()
 
@@ -85,11 +88,9 @@ class MsgBusClient:
 
     def send(self, msg_type, target, msg):
         #self.outbound_q.put( json.dumps( Message(msg_type, self.client_id, target, msg) ) )
-        if self.client_id == 'skill_manager':
-            if BARK:
-                print("[%s]SENT: %s" % (self.client_id, msg))
         self.client.send( json.dumps( Message(msg_type, self.client_id, target, msg) ) )
 
     def close(self):
+        self.status = 'Not Connected'
         self.client.close()
 
