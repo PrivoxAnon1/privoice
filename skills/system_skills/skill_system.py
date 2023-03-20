@@ -195,8 +195,13 @@ class SystemSkill(PriVoice):
         data = msg.data
 
         if data['subtype'] == 'oob':
+            print("XXXXXXXXXXXXXXXX   system handle oob %s" % (data,))
+
             # if out of band single word verb ...
-            verb = data['verb']
+            #verb = data['verb']
+            # we expect sentence to start with [oob] so remove it
+            verb = data['sentence'][5:]
+
             verb = verb.lower()
             verb = verb.replace(".","")
             verb = verb.replace(",","")

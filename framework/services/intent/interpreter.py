@@ -65,6 +65,7 @@ class Interpret:
         self.wake_word_match = ''
         self.num_words_to_whack = 0
         self.last_utt = ''
+        self.last_oob = ''
         self.lock = Lock()
         self.watchdog_thread = Thread(target=wd_task, args=(self.lock, self.shared_data)).start()
 
@@ -100,8 +101,9 @@ class Interpret:
     def is_oob(self, utt):
         # return '' if not, else the oob
         utt = self.clean_utt(utt)
+        utt = utt.split(" ")[0].lower()
         try:
-            indx = oobs.index(utt.split(" ")[0].lower())
+            indx = oobs.index(utt)
             return oobs[indx]
         except:
             return ''
@@ -122,9 +124,11 @@ class Interpret:
                     return 'WW'
                 else:
                     # wake word detected but could still be oob
-                    oob = self.is_oob(utt)
+                    #oob = self.is_oob(utt)
+                    oob = self.is_oob(sentence)
                     if oob != '':
                         #return 'MSG[Q_OOB]%s' % (oob,)
+                        self.last_oob = oob
                         return 'Q_OOB'
                     else:
                         # wake word detected not oob
@@ -136,6 +140,7 @@ class Interpret:
                 oob = self.is_oob(utt)
                 if oob != '':
                     #return 'MSG[U_OOB]%s' % (oob,)
+                    self.last_oob = oob
                     return 'U_OOB'
         else:
             # already got the wake word last utterance
@@ -143,6 +148,7 @@ class Interpret:
             oob = self.is_oob(utt)
             if oob != '':
                 #return 'MSG[Q_OOB]%s' % (oob,)
+                self.last_oob = oob
                 return 'Q_OOB'
 
             # otherwise, we have a qualified utt

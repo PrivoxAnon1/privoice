@@ -188,7 +188,9 @@ class UttProc:
         self.log.debug("Intent processor handle raw - result: %s" % (res,))
 
         if res == 'U_OOB' or res == 'Q_OOB':
-            res = self.send_oob_to_system(utt, '[OOB]' + utt) 
+            #contents = '[OOB]' + utt
+            contents = '[OOB]' + self.interpreter.last_oob
+            res = self.send_oob_to_system(utt, contents)
 
         if res == 'Q_UTT':
             utt = self.interpreter.q_utt
@@ -232,7 +234,7 @@ class UttProc:
                 'intent_match':''
                 }
 
-            print("INTENTSVC: %s" % (info,))
+            #print("INTENTSVC: %s" % (info,))
             # sentence types 
             # Q - question
             # C - command
@@ -259,10 +261,8 @@ class UttProc:
 
             elif si.sentence_type == 'O':
                 self.log.debug("OOB Command")
-                if utt in self.recognized_verbs:
-                    self.send_oob_to_system(utt, contents)
-                else:
-                    self.log.warning("Ignoring not recognized OOB in intent_service '%s' not found in %s" % (utt,self.recognized_verbs))
+                contents = '[OOB]' + self.interpreter.last_oob
+                self.send_oob_to_system(utt, contents)
 
             else:
                 self.log.warning("Unknown sentence type or Informational sentence. Ignored for now.")
