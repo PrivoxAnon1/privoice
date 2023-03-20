@@ -45,8 +45,8 @@ echo ' '
 
 cd tmp
 git clone https://github.com/PrivoxAnon1/privoice_skills.git
-cp -r privoice_skills/* ../skills/user_skills/.
 cd ..
+bash scripts/install_default_skills.sh
 echo ' '
 echo 'Default skills installed'
 echo ' '
