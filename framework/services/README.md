@@ -2,9 +2,12 @@
 
 General flow is 
 
+<pre>
+
                                      |---> media 
 Recognizer ---> Intent ---> Skill ---|
                                      |---> tts
+</pre>
 
 intent: the intent service. converts raw messages to intent messages or oobs
 leans on the nlp/nlu shallow parse method. see nlp/ for more info.
