@@ -7,16 +7,17 @@ class HalAbc:
     device and the ability to control their levels """
     __metaclass__ = abc.ABCMeta
     @abc.abstractmethod
-    def __init__(self, input_device_id, input_level_control_name, output_device_name, output_level_control_name):
-        self.input_device_id = input_device_id
+    def __init__(self, master_control_name, input_device_name, input_level_control_name, output_device_name, output_level_control_name):
+        self.master_control_name = master_control_name
+        self.input_device_name = input_device_name
         self.input_level_control_name = input_level_control_name
         self.output_device_name = output_device_name
         self.output_level_control_name = output_level_control_name 
 
     @abc.abstractmethod
-    def get_input_device_id(self):
+    def get_input_device_name(self):
         """returns an int """
-        return self.input_device_id
+        return self.input_device_name
 
     @abc.abstractmethod
     def get_output_device_name(self):

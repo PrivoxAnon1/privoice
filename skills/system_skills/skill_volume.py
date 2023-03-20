@@ -2,7 +2,6 @@ from skills.pvx_base import PriVoice
 from threading import Event
 import os, re
 from framework.util.utils import execute_command, Config
-#from framework.hal.hal import Hal
 
 class VolumeSkill(PriVoice):
     def __init__(self, bus=None, timeout=5):
@@ -11,7 +10,8 @@ class VolumeSkill(PriVoice):
 
         # don't really know where the actual init belongs!
         cfg = Config()
-        input_device_id = cfg.get_cfg_val('Advanced.InputDeviceId')
+        master_control_name = cfg.get_cfg_val('Advanced.MasterControlName')
+        input_device_name = cfg.get_cfg_val('Advanced.InputDeviceName')
         input_level_control_name = cfg.get_cfg_val('Advanced.InputLevelControlName')
         output_device_name = cfg.get_cfg_val('Advanced.OutputDeviceName')
         output_level_control_name = cfg.get_cfg_val('Advanced.OutputLevelControlName')
@@ -26,8 +26,7 @@ class VolumeSkill(PriVoice):
         elif cfg_platform == 'l':
             from framework.hal.executables.linux import Platform
 
-
-        self.hal = Platform(input_device_id, input_level_control_name, output_device_name, output_level_control_name)
+        self.hal = Platform(master_control_name, input_device_name, input_level_control_name, output_device_name, output_level_control_name)
 
         # note we use existing system settings
         # but we could also set them here and 

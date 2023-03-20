@@ -158,17 +158,34 @@ class MediaSession:
         self.correlator = ''
 
 
-def aplay(file):
+def aplay(file, execute=True):
     # one place where the raw aplay is used
     # which uses proper device entry from
     # the config file. eventually belongs 
     # in a hal object
     cfg = Config()
-    device_id = cfg.get_cfg_val('Advanced.OutputDeviceName')
+    device_name = cfg.get_cfg_val('Advanced.OutputDeviceName')
     cmd = "aplay " + file
-    if device_id is not None and device_id != '':
-        cmd = "aplay -D" + device_id + " " + file
-    os.system(cmd)
+    if device_name is not None and device_name != '':
+        cmd = "aplay -D" + device_name + " " + file
+    if execute:
+        os.system(cmd)
+    return cmd
+
+
+def mpg(file, execute=True):
+    # one place where the raw mpg player is used
+    # which uses proper device entry from
+    # the config file. eventually belongs 
+    # in a hal object
+    cfg = Config()
+    device_name = cfg.get_cfg_val('Advanced.OutputDeviceName')
+    cmd = "mpg123 %s" % (file,)
+    if device_name is not None and device_name != '':
+        cmd = "mpg123 -a " + device_name + " " + file
+    if execute:
+        os.system(cmd)
+    return cmd
 
 
 # for simple blocking operations

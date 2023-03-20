@@ -5,31 +5,32 @@ import os
 class Platform(HalAbc):
     """ standard linux ubuntu type hardware support. Note
         additional mute/unmute support is also provided """
-    def __init__(self, input_device_id, input_level_control_name, output_device_name, output_level_control_name):
+    def __init__(self, master_control_name, input_device_name, input_level_control_name, output_device_name, output_level_control_name):
         self.type = 'Ubuntu'
-        self.input_device_id = input_device_id
 
-        #self.input_level_control_name = input_level_control_name
-        self.input_level_control_name = "Master"
-
+        self.master_control_name = master_control_name
+        self.input_device_name = input_device_name
+        self.input_level_control_name = input_level_control_name
         self.output_device_name = output_device_name
+        self.output_level_control_name = output_level_control_name
 
-        #self.output_level_control_name = output_level_control_name
-        self.output_level_control_name = "Master"
 
-        os.system("amixer sset -c 2 Capture 100%")
-        os.system("amixer sset -c 2 Speaker 100%")
-        os.system("amixer sset -c 2 Master 75%")
+        set_master_cmd = "amixer sset %s 100%s" % (master_control_name, '%')
+        os.system(set_master_cmd)
+
+        self.set_input_level(100)
+        self.set_output_level(75)
+
 
     def set_input_level(self, new_level):
-        cmd = "amixer sset -c 2 '%s' %s%%" % (self.input_level_control_name, new_level)
+        # new_level is a number between 0-100
+        cmd = "amixer sset %s %s%%" % (self.input_level_control_name, new_level)
         os.system(cmd)
 
     def get_input_level(self):
-        cmd = "amixer sget -c 2 '%s'" % (self.input_level_control_name,)
+        cmd = "amixer sget %s" % (self.input_level_control_name,)
         res = execute_command(cmd)
         res = res.split("\n")
-
         for line in res:
             if line.find("Limits") == -1:
                 start_indx = line.find("[")
@@ -42,14 +43,13 @@ class Platform(HalAbc):
                         return current_volume
 
     def set_output_level(self, new_level):
-        cmd = "amixer sset -c 2 %s %s%%" % (self.output_level_control_name, new_level)
+        cmd = "amixer sset %s %s%%" % (self.output_level_control_name, new_level)
         os.system(cmd)
 
     def get_output_level(self):
-        cmd = "amixer sget -c 2 %s" % (self.output_level_control_name,)
+        cmd = "amixer sget %s" % (self.output_level_control_name,)
         res = execute_command(cmd)
         res = res.split("\n")
-
         for line in res:
             if line.find("Limits") == -1:
                 start_indx = line.find("Playback ")
@@ -61,8 +61,8 @@ class Platform(HalAbc):
                         current_volume = line[start_indx+1:end_indx].replace("%","")
                         return current_volume
 
-    def get_input_device_id(self):
-        return self.input_device_id
+    def get_input_device_name(self):
+        return self.input_device_name
 
     def get_output_device_name(self):
         return self.output_device_name

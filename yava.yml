@@ -1,10 +1,11 @@
 - Advanced:
     CrappyAEC: n
-    InputDeviceId: '0'
-    InputLevelControlName: ''
+    MasterControlName: "-c 2 'Master'"
+    InputDeviceName: ''
+    InputLevelControlName: "-c 2 'Capture'"
     LogLevel: i
     OutputDeviceName: ''
-    OutputLevelControlName: ''
+    OutputLevelControlName: "-c 2 'Speaker'"
     Platform: l
 
     NLP:

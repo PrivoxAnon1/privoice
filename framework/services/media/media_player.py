@@ -3,7 +3,7 @@ from bus.Message import Message
 from bus.MsgBusClient import MsgBusClient
 import time, os
 from subprocess import Popen, PIPE, STDOUT
-from framework.util.utils import CommandExecutor, LOG, Config, MediaSession
+from framework.util.utils import CommandExecutor, LOG, Config, MediaSession, aplay, mpg
 from framework.message_types import MSG_MEDIA, MSG_SKILL
 
 class PVXMediaPlayerSkill:
@@ -475,41 +475,32 @@ class PVXMediaPlayerSkill:
                 cmd = ''
                 if media_type is None or media_type == '':
                     self.log.warning("ERROR - invalid media type ! %s. Will attempt to derive" % (media_type,))
-                    self.current_session.media_type = 'mp3'
-                    cmd = "mpg123 %s" % (file_uri,)  
-                    if device_id is not None:
-                        cmd = "mpg123 -a " + device_id + " " + file_uri
 
-                        if file_ext == "wav":
-                            cmd = "aplay " + file_uri
-                            if device_id is not None and device_id != '':
-                                cmd = "aplay -D" + device_id + " " + file_uri
-                            self.current_session.media_type = 'wav'
-                    self.log.warning("ERROR - derived media type = %s." % (media_type,))
+                    self.current_session.media_type = 'mp3'
+                    cmd = mpg(file_uri, execute=False)  
+
+                    if file_ext == "wav":
+                        self.current_session.media_type = 'wav'
+                        cmd = aplay(file_uri, execute=False)
+
+                    self.log.warning("MediaPlayer: derived media type = %s." % (media_type,))
                 else:
                     # else media type is known so use it 
                     # to get cmd line from supported cmds
 
                     # we currently support wav, mp3, stream using cvlc and 
                     # stream using ytdownload cmd line tool with cvlc
-                    # we use the hal to determine the command line for the
-                    # actual player so we can support anything
-                    media_cmds = {"mp3":"mpg123 %s", "wav":"aplay %s", "stream_ytdl":"youtube-dl -o - '%s' | vlc -", "stream_vlc":"cvlc --global-key-play-pause='s' %s"}
                     self.current_session.media_type = media_type
+                    if media_type == "wav":
+                        cmd = aplay(file_uri, execute=False)
+                    elif media_type == "mp3":
+                        cmd = mpg(file_uri, execute=False)
+                    elif media_type == "stream_ytdl":
+                        cmd = "youtube-dl -o - '%s' | vlc -" % (file_uri,)
+                    elif media_type == "stream_vlc":
+                        cmd = "cvlc --global-key-play-pause='s' %s" % (file_uri,)
 
-                    #media_player_cfg = self.hal.get('play_media', None)
-                    media_player_cfg = media_cmds
-
-                    if media_player_cfg:
-                        cmd = media_player_cfg.get(self.current_session.media_type,'')
-
-                    if cmd == '':
-                        self.log.error("ERROR - invalid media player command line !")
-                        return 
-                    else:
-                        cmd = cmd % (file_uri,)
-
-                self.log.info("cmd = %s" % (cmd,))
+                self.log.info("MediaPlayer: cmd = %s" % (cmd,))
              
                 self.current_session.ce = CommandExecutor(cmd)
 
