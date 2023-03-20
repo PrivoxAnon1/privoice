@@ -14,13 +14,11 @@ class Platform(HalAbc):
         self.output_device_name = output_device_name
         self.output_level_control_name = output_level_control_name
 
-
         set_master_cmd = "amixer sset %s 100%s" % (master_control_name, '%')
         os.system(set_master_cmd)
 
         self.set_input_level(100)
         self.set_output_level(75)
-
 
     def set_input_level(self, new_level):
         # new_level is a number between 0-100
@@ -74,6 +72,7 @@ class Platform(HalAbc):
         return output_level_control_name
 
     def mute_master(self, new_level):
+        # TODO convert these to set vol calls
         os.system("amixer -q -D pulse sset Master mute")
 
     def unmute_master(self, new_level):
