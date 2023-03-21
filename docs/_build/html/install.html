@@ -61,7 +61,7 @@ is working correctly open a terminal and enter this command</p>
 </pre></div>
 </div>
 <p>You should hear what you just recorded. If you don’t this will need to be
-corrected before you can continue. See the <strong>Installation Issues</strong> section
+corrected before you can continue. See the <a class="reference internal" href="#installation-issues">Installation Issues</a>. section
 below for more help with this.</p>
 </section>
 <section id="install">
@@ -102,13 +102,24 @@ Default<span class="w"> </span>skills<span class="w"> </span>installed
 </section>
 <section id="installation-issues">
 <h2>Installation Issues<a class="headerlink" href="#installation-issues" title="Permalink to this heading">¶</a></h2>
-<p>Installation issues tend to fall into one of several categories; software modules, linux device names or alsa names.</p>
+<p>Installation issues tend to fall into one of several categories; software modules, Linux device names or ALSA names.</p>
+<p>Software modules like Pytorch may not install properly on lower end systems or uncommon environments like a Kendryte
+Risc board or Raspberry Pi. In this case you will need to figure out how to get the module installed in your
+environment. Isolating the module and just getting one module at a time to install is usually the best approach.</p>
+<p>Linux device names are the names used by the <em>aplay</em> and <em>arecord</em> commands. In most cases you will not need to
+worry about this, but if you do there is an entry in the yava.yml file which holds this value and you can simply
+set it there. This value is the value used with the ‘-D’ command line parameter. For example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aplay<span class="w"> </span>-D<span class="w"> </span>plughw:VF_ASR_<span class="o">(</span>L<span class="o">)</span>
+</pre></div>
+</div>
+<p>If you leave this value blank no ‘-D’ will be added to the command line for the <em>aplay</em> command which in most cases is what you want. See the <a class="reference internal" href="#device-names">Device Names</a> section below for more information.</p>
+<p>ALSA names are used to control the input and output device levels. These are typically the microphone and speaker. If these are not set correctly PriVoice will not be able to change the volume. See the section below on <a class="reference internal" href="#alsa-names">ALSA Names</a> for more information.</p>
 <section id="device-names">
 <h3>Device Names<a class="headerlink" href="#device-names" title="Permalink to this heading">¶</a></h3>
-<p>If either ‘arecord’ or ‘aplay’ are not working you will need to correct this first. These are foundational.
-Assuming you have hardware and it is working the most likely issue is the .asourdrc file. This can be worked around
-by setting the device name in the yava.yml file. Finding the correct device name could be a pain. For example here is
-the output of the command ‘aplay -L’ on my laptop …</p>
+<p>If either <em>arecord</em> or <em>aplay</em> are not working you will need to correct this first. These are foundational to the system.</p>
+<p>Assuming you have hardware and it is working the most likely issue is the ‘.asourdrc’ file. This can be worked around
+by setting the device name in the yava.yml file. Finding the correct device name can be a pain. For example here is
+the output of the command <strong>‘aplay -L’</strong> on one laptop …</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>null
 <span class="w">  </span>Discard<span class="w"> </span>all<span class="w"> </span>samples<span class="w"> </span><span class="o">(</span>playback<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>generate<span class="w"> </span>zero<span class="w"> </span>samples<span class="w"> </span><span class="o">(</span>capture<span class="o">)</span>
 default
@@ -234,9 +245,17 @@ usbstream:CARD<span class="o">=</span>acp
 <span class="w">  </span>USB<span class="w"> </span>Stream<span class="w"> </span>Output
 </pre></div>
 </div>
-<p>Hopefully your output is far less. Regardless, you will need to test each device name until you hit the correct one.
-It should be noted the device name must be derived from the above output by combining some of the output. For example
-using the device</p>
+<p>You can also run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/list_input_devices.py
+</pre></div>
+</div>
+<p>To get a list of device names on your system. Of course this won’t run unless you are in your base directory and you have previously run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.<span class="w"> </span>./scripts/init_env.sh
+</pre></div>
+</div>
+<p>Hopefully your output is far less than this mess. Regardless, you will need to test each device name until you hit the correct one.
+It should be noted the device name must be derived from the output by combining some of the output. This amounts to removing the
+‘CARD=’ from the output line. For example using the output line</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>plughw:CARD<span class="o">=</span>Generic_1,DEV<span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
@@ -256,7 +275,7 @@ using the device</p>
 <section id="alsa-names">
 <h3>ALSA Names<a class="headerlink" href="#alsa-names" title="Permalink to this heading">¶</a></h3>
 <p>The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the yava.yml file.</p>
-<p>Again, finding the value is often not straightforward. For example, here is some output from my laptop</p>
+<p>Again, finding the value is often not straightforward. For example, here is some output from a laptop</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>amixer<span class="w"> </span>scontrols
 
 Simple<span class="w"> </span>mixer<span class="w"> </span>control<span class="w"> </span><span class="s1">&#39;IEC958&#39;</span>,0
@@ -317,6 +336,49 @@ Simple<span class="w"> </span>mixer<span class="w"> </span>control<span class="w
 <span class="w">  </span>Front<span class="w"> </span>Right:<span class="w"> </span>Capture<span class="w"> </span><span class="m">63</span><span class="w"> </span><span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">30</span>.00dB<span class="o">]</span><span class="w"> </span><span class="o">[</span>off<span class="o">]</span>
 </pre></div>
 </div>
+<p>In most cases you will probably not need the ‘-c’ (card) option. In this case the command would be</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>amixer<span class="w"> </span>sget<span class="w"> </span>Speaker
+Simple<span class="w"> </span>mixer<span class="w"> </span>control<span class="w"> </span><span class="s1">&#39;Speaker&#39;</span>,0
+<span class="w">  </span>Capabilities:<span class="w"> </span>pvolume<span class="w"> </span>pswitch
+<span class="w">  </span>Playback<span class="w"> </span>channels:<span class="w"> </span>Front<span class="w"> </span>Left<span class="w"> </span>-<span class="w"> </span>Front<span class="w"> </span>Right
+<span class="w">  </span>Limits:<span class="w"> </span>Playback<span class="w"> </span><span class="m">0</span><span class="w"> </span>-<span class="w"> </span><span class="m">87</span>
+<span class="w">  </span>Mono:
+<span class="w">  </span>Front<span class="w"> </span>Left:<span class="w"> </span>Playback<span class="w"> </span><span class="m">87</span><span class="w"> </span><span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">0</span>.00dB<span class="o">]</span><span class="w"> </span><span class="o">[</span>on<span class="o">]</span>
+<span class="w">  </span>Front<span class="w"> </span>Right:<span class="w"> </span>Playback<span class="w"> </span><span class="m">87</span><span class="w"> </span><span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">0</span>.00dB<span class="o">]</span><span class="w"> </span><span class="o">[</span>on<span class="o">]</span>
+</pre></div>
+</div>
+<p>You can run this command which will try to auto-detect your card and master control.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>test/find_volume_control.py
+
+Found<span class="w"> </span>card<span class="w"> </span><span class="m">2</span><span class="w"> </span>---&gt;<span class="w"> </span>Simple<span class="w"> </span>mixer<span class="w"> </span>control<span class="w"> </span><span class="s1">&#39;Master&#39;</span>,0
+
+To<span class="w"> </span>change<span class="w"> </span>your<span class="w"> </span>volume<span class="w"> </span>use<span class="w"> </span>this<span class="w"> </span><span class="nb">command</span><span class="w"> </span>amixer<span class="w"> </span>-c<span class="w"> </span><span class="m">2</span><span class="w"> </span>sset<span class="w"> </span>Master<span class="w"> </span><span class="m">75</span>%
+</pre></div>
+</div>
+<p>Note - the entire combination must be entered in the yava.yml file. For example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-<span class="w"> </span>Advanced:
+<span class="w">  </span>CrappyAEC:<span class="w"> </span>n
+<span class="w">  </span>MasterControlName:<span class="w"> </span><span class="s2">&quot;-c 2 &#39;Master&#39;&quot;</span>
+<span class="w">  </span>InputDeviceName:<span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="w">  </span>InputLevelControlName:<span class="w"> </span><span class="s2">&quot;-c 2 &#39;Capture&#39;&quot;</span>
+<span class="w">  </span>LogLevel:<span class="w"> </span>i
+<span class="w">  </span>OutputDeviceName:<span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="w">  </span>OutputLevelControlName:<span class="w"> </span><span class="s2">&quot;-c 2 &#39;Speaker&#39;&quot;</span>
+<span class="w">  </span>Platform:<span class="w"> </span>l
+</pre></div>
+</div>
+<p>Or if no card is required.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-<span class="w"> </span>Advanced:
+<span class="w">  </span>CrappyAEC:<span class="w"> </span>n
+<span class="w">  </span>MasterControlName:<span class="w"> </span><span class="s2">&quot;&#39;Master&#39;&quot;</span>
+<span class="w">  </span>InputDeviceName:<span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="w">  </span>InputLevelControlName:<span class="w"> </span><span class="s2">&quot;&#39;Capture&#39;&quot;</span>
+<span class="w">  </span>LogLevel:<span class="w"> </span>i
+<span class="w">  </span>OutputDeviceName:<span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="w">  </span>OutputLevelControlName:<span class="w"> </span><span class="s2">&quot;&#39;Speaker&#39;&quot;</span>
+<span class="w">  </span>Platform:<span class="w"> </span>l
+</pre></div>
+</div>
 </section>
 <section id="software-modules">
 <h3>Software Modules<a class="headerlink" href="#software-modules" title="Permalink to this heading">¶</a></h3>
@@ -348,12 +410,40 @@ BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<sp
 <p>The output shown above lists several important values.</p>
 <p>First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string.</p>
 <p>From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time.</p>
-<p>If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.</p>
+<p>If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy.</p>
+<p>You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two.</p>
 </section>
 <section id="operational-issues">
 <h2>Operational Issues<a class="headerlink" href="#operational-issues" title="Permalink to this heading">¶</a></h2>
+<p>Nothing is more disappointing than seeing the following output</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./framework/services/recognizer/recognizer.sh
+Recording<span class="w"> </span>WAVE<span class="w"> </span><span class="s1">&#39;stdin&#39;</span><span class="w"> </span>:<span class="w"> </span>Signed<span class="w"> </span><span class="m">16</span><span class="w"> </span>bit<span class="w"> </span>Little<span class="w"> </span>Endian,<span class="w"> </span>Rate<span class="w"> </span><span class="m">16000</span><span class="w"> </span>Hz,<span class="w"> </span>Mono
+Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </span>recent<span class="w"> </span>call<span class="w"> </span>last<span class="o">)</span>:
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/framework/services/recognizer/recognizer.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">159</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>&lt;module&gt;
+<span class="w">    </span><span class="nv">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>SilenceDetector<span class="o">()</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/framework/services/recognizer/recognizer.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">65</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>__init__
+<span class="w">    </span>self.model<span class="w"> </span><span class="o">=</span><span class="w"> </span>whisper.load_model<span class="o">(</span>self.model_name<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/whisper/__init__.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">122</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>load_model
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>model.to<span class="o">(</span>device<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">989</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>to
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>self._apply<span class="o">(</span>convert<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">641</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>_apply
+<span class="w">    </span>module._apply<span class="o">(</span>fn<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">641</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>_apply
+<span class="w">    </span>module._apply<span class="o">(</span>fn<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">641</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>_apply
+<span class="w">    </span>module._apply<span class="o">(</span>fn<span class="o">)</span>
+<span class="w">  </span><span class="o">[</span>Previous<span class="w"> </span>line<span class="w"> </span>repeated<span class="w"> </span><span class="m">2</span><span class="w"> </span>more<span class="w"> </span>times<span class="o">]</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">664</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>_apply
+<span class="w">    </span><span class="nv">param_applied</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>fn<span class="o">(</span>param<span class="o">)</span>
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">987</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>convert
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>t.to<span class="o">(</span>device,<span class="w"> </span>dtype<span class="w"> </span><span class="k">if</span><span class="w"> </span>t.is_floating_point<span class="o">()</span><span class="w"> </span>or<span class="w"> </span>t.is_complex<span class="o">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span>None,<span class="w"> </span>non_blocking<span class="o">)</span>
+torch.cuda.OutOfMemoryError:<span class="w"> </span>CUDA<span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span>memory.<span class="w"> </span>Tried<span class="w"> </span>to<span class="w"> </span>allocate<span class="w"> </span><span class="m">26</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span>GPU<span class="w"> </span><span class="m">0</span><span class="p">;</span><span class="w"> </span><span class="m">3</span>.81<span class="w"> </span>GiB<span class="w"> </span>total<span class="w"> </span>capacity<span class="p">;</span><span class="w"> </span><span class="m">3</span>.02<span class="w"> </span>GiB<span class="w"> </span>already<span class="w"> </span>allocated<span class="p">;</span><span class="w"> </span><span class="m">3</span>.44<span class="w"> </span>MiB<span class="w"> </span>free<span class="p">;</span><span class="w"> </span><span class="m">3</span>.27<span class="w"> </span>GiB<span class="w"> </span>reserved<span class="w"> </span><span class="k">in</span><span class="w"> </span>total<span class="w"> </span>by<span class="w"> </span>PyTorch<span class="o">)</span><span class="w"> </span>If<span class="w"> </span>reserved<span class="w"> </span>memory<span class="w"> </span>is<span class="w"> </span>&gt;&gt;<span class="w"> </span>allocated<span class="w"> </span>memory<span class="w"> </span>try<span class="w"> </span>setting<span class="w"> </span>max_split_size_mb<span class="w"> </span>to<span class="w"> </span>avoid<span class="w"> </span>fragmentation.<span class="w">  </span>See<span class="w"> </span>documentation<span class="w"> </span><span class="k">for</span><span class="w"> </span>Memory<span class="w"> </span>Management<span class="w"> </span>and<span class="w"> </span>PYTORCH_CUDA_ALLOC_CONF
+</pre></div>
+</div>
+<p>Ouch, my GPU ran out of memory. WTF? It has like 4GB.</p>
 <p>The STT models require anywhere from approximately 1GB to upwards of 10GB. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch) you will be limited to the GPU RAM.</p>
-<p>For example, my laptop has 4GB of GPU RAM, so using the GPU I can only run the small model and under, however, if I disable the GPU I can run any model using my laptop CPU because my laptop has over 16GB of RAM. Using the GPU is about twice as fast on my laptop. You mileage may vary.</p>
+<p>For example if a laptop has 4GB of GPU RAM it can only run the small model and under, however, if you disable the GPU you can run any model that fits in your available memory. Of course this assumes your CPU has more memory available than your GPU. If your system has more than 32GB of RAM you should be able to run any model.</p>
 <p>In general the ‘tiny’ model works fine but you can always edit the yava.yml file and change the model.</p>
 <p>STT models have several attributes …</p>
 <ul class="simple">

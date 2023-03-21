@@ -40,7 +40,7 @@ Then say something and hit CTL+C to stop the recording. Next enter this command
    aplay test.wav
 
 You should hear what you just recorded. If you don't this will need to be 
-corrected before you can continue. See the **Installation Issues** section 
+corrected before you can continue. See the `Installation Issues`_. section 
 below for more help with this.
 
 
@@ -90,15 +90,34 @@ Once it has completed you should see something like this on your screen
 ===================
 Installation Issues
 ===================
-Installation issues tend to fall into one of several categories; software modules, linux device names or alsa names.
+Installation issues tend to fall into one of several categories; software modules, Linux device names or ALSA names.
+
+
+Software modules like Pytorch may not install properly on lower end systems or uncommon environments like a Kendryte
+Risc board or Raspberry Pi. In this case you will need to figure out how to get the module installed in your 
+environment. Isolating the module and just getting one module at a time to install is usually the best approach.
+
+Linux device names are the names used by the *aplay* and *arecord* commands. In most cases you will not need to 
+worry about this, but if you do there is an entry in the yava.yml file which holds this value and you can simply 
+set it there. This value is the value used with the '-D' command line parameter. For example 
+
+
+.. code-block:: bash
+
+   aplay -D plughw:VF_ASR_(L)
+
+If you leave this value blank no '-D' will be added to the command line for the *aplay* command which in most cases is what you want. See the `Device Names`_ section below for more information.
+
+ALSA names are used to control the input and output device levels. These are typically the microphone and speaker. If these are not set correctly PriVoice will not be able to change the volume. See the section below on `ALSA Names`_ for more information.
 
 ------------
 Device Names
 ------------
-If either 'arecord' or 'aplay' are not working you will need to correct this first. These are foundational. 
-Assuming you have hardware and it is working the most likely issue is the .asourdrc file. This can be worked around 
-by setting the device name in the yava.yml file. Finding the correct device name could be a pain. For example here is
-the output of the command 'aplay -L' on my laptop ...
+If either *arecord* or *aplay* are not working you will need to correct this first. These are foundational to the system. 
+
+Assuming you have hardware and it is working the most likely issue is the '.asourdrc' file. This can be worked around 
+by setting the device name in the yava.yml file. Finding the correct device name can be a pain. For example here is
+the output of the command **'aplay -L'** on one laptop ...
 
 
 .. code-block:: bash
@@ -227,9 +246,22 @@ the output of the command 'aplay -L' on my laptop ...
     acp
     USB Stream Output
 
-Hopefully your output is far less. Regardless, you will need to test each device name until you hit the correct one.
-It should be noted the device name must be derived from the above output by combining some of the output. For example 
-using the device 
+You can also run 
+
+.. code-block:: bash
+
+   python test/list_input_devices.py
+
+To get a list of device names on your system. Of course this won't run unless you are in your base directory and you have previously run 
+
+.. code-block:: bash
+
+   . ./scripts/init_env.sh
+
+
+Hopefully your output is far less than this mess. Regardless, you will need to test each device name until you hit the correct one.
+It should be noted the device name must be derived from the output by combining some of the output. This amounts to removing the 
+'CARD=' from the output line. For example using the output line
 
 .. code-block:: bash
 
@@ -259,8 +291,7 @@ ALSA Names
 ----------
 The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the yava.yml file. 
 
-Again, finding the value is often not straightforward. For example, here is some output from my laptop
-
+Again, finding the value is often not straightforward. For example, here is some output from a laptop
 
 .. code-block:: bash
 
@@ -301,7 +332,6 @@ Again, finding the value is often not straightforward. For example, here is some
 
   $ amixer -c 3 scontrols
 
-
 Again, hopefully your system is not quite as complex, but what we are ultimately looking for are the Mic and Speaker control names. 
 In my case the values I am looking for are 'Speaker' and 'Capture'. You can verify by running the 'amixer sget' command like this 
 
@@ -328,6 +358,58 @@ And for the microphone
     Limits: Capture 0 - 63
     Front Left: Capture 63 [100%] [30.00dB] [off]
     Front Right: Capture 63 [100%] [30.00dB] [off]
+
+In most cases you will probably not need the '-c' (card) option. In this case the command would be 
+
+.. code-block:: bash
+
+  $ amixer sget Speaker
+  Simple mixer control 'Speaker',0
+    Capabilities: pvolume pswitch
+    Playback channels: Front Left - Front Right
+    Limits: Playback 0 - 87
+    Mono:
+    Front Left: Playback 87 [100%] [0.00dB] [on]
+    Front Right: Playback 87 [100%] [0.00dB] [on]
+
+You can run this command which will try to auto-detect your card and master control. 
+
+.. code-block:: bash
+
+  $ python test/find_volume_control.py
+
+  Found card 2 ---> Simple mixer control 'Master',0
+
+  To change your volume use this command amixer -c 2 sset Master 75%
+
+Note - the entire combination must be entered in the yava.yml file. For example 
+
+.. code-block:: bash
+
+  - Advanced:
+    CrappyAEC: n
+    MasterControlName: "-c 2 'Master'"
+    InputDeviceName: ''
+    InputLevelControlName: "-c 2 'Capture'"
+    LogLevel: i
+    OutputDeviceName: ''
+    OutputLevelControlName: "-c 2 'Speaker'"
+    Platform: l
+
+
+Or if no card is required.
+
+.. code-block:: bash
+
+  - Advanced:
+    CrappyAEC: n
+    MasterControlName: "'Master'"
+    InputDeviceName: ''
+    InputLevelControlName: "'Capture'"
+    LogLevel: i
+    OutputDeviceName: ''
+    OutputLevelControlName: "'Speaker'"
+    Platform: l
 
 
 ----------------
@@ -356,7 +438,6 @@ This will run the recognizer using the default system configuration values.
 You should see what you say printed on the screen. Your output should look
 similar to this
 
-
 .. code-block:: bash
 
    Recording WAVE 'stdin' : Signed 16 bit Little Endian, Rate 16000 Hz, Mono
@@ -373,14 +454,47 @@ First, the numbers 58240 and 25600 represent the size of the wav data produced b
 
 From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. 
 
-If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc.
+If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. 
+
+You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two.
 
 ==================
 Operational Issues
 ==================
+
+Nothing is more disappointing than seeing the following output 
+
+.. code-block:: bash
+
+  $ ./framework/services/recognizer/recognizer.sh 
+  Recording WAVE 'stdin' : Signed 16 bit Little Endian, Rate 16000 Hz, Mono
+  Traceback (most recent call last):
+    File "/PriVoice/framework/services/recognizer/recognizer.py", line 159, in <module>
+      sd = SilenceDetector()
+    File "/PriVoice/framework/services/recognizer/recognizer.py", line 65, in __init__
+      self.model = whisper.load_model(self.model_name)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/whisper/__init__.py", line 122, in load_model
+      return model.to(device)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 989, in to
+      return self._apply(convert)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 641, in _apply
+      module._apply(fn)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 641, in _apply
+      module._apply(fn)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 641, in _apply
+      module._apply(fn)
+    [Previous line repeated 2 more times]
+    File "PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 664, in _apply
+      param_applied = fn(param)
+    File "/PriVoice/venv_pvx/lib/python3.10/site-packages/torch/nn/modules/module.py", line 987, in convert
+      return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+  torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 26.00 MiB (GPU 0; 3.81 GiB total capacity; 3.02 GiB already allocated; 3.44 MiB free; 3.27 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+
+Ouch, my GPU ran out of memory. WTF? It has like 4GB.
+
 The STT models require anywhere from approximately 1GB to upwards of 10GB. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch) you will be limited to the GPU RAM. 
 
-For example, my laptop has 4GB of GPU RAM, so using the GPU I can only run the small model and under, however, if I disable the GPU I can run any model using my laptop CPU because my laptop has over 16GB of RAM. Using the GPU is about twice as fast on my laptop. You mileage may vary.
+For example if a laptop has 4GB of GPU RAM it can only run the small model and under, however, if you disable the GPU you can run any model that fits in your available memory. Of course this assumes your CPU has more memory available than your GPU. If your system has more than 32GB of RAM you should be able to run any model. 
 
 In general the 'tiny' model works fine but you can always edit the yava.yml file and change the model. 
 

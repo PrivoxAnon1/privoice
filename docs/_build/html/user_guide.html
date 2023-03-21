@@ -84,14 +84,26 @@ system as expected (stop the currently active skill) as well as ‘pause’ and
 The documentation will often use the following convention when describing commands …</p>
 <p>WW what time is it.</p>
 <p>Which simply means you spoke the wake word (WW) first. Note you control what the
-wake word is by modifying the value in the ‘yava.ym; file. See <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a> for more
-information on how to change the wake word.</p>
+wake word is by modifying the value in the <em>yava.yml</em> file. See <a class="reference internal" href="configuration.html#configuration"><span class="std std-ref">Configuration</span></a> for more
+information on how to change the wake word. The system ships with six skills installed by default.</p>
+<ul class="simple">
+<li><p>time and date skill</p></li>
+<li><p>volume skill</p></li>
+<li><p>weather skill</p></li>
+<li><p>wiki skill</p></li>
+<li><p>radio skill</p></li>
+<li><p>example skill</p></li>
+</ul>
+<p>Typical usage might be</p>
 <ul class="simple">
 <li><p>WW what time is it</p></li>
 <li><p>WW what is today’s date</p></li>
-<li><p>WW who was Abraham Lincoln</p></li>
+<li><p>WW &lt;&lt;brief delay&gt;&gt; set the volume to ninety percent</p></li>
+<li><p>WW what is the volume set to</p></li>
 <li><p>WW what is the weather forecast</p></li>
-<li><p>WW play jazz</p></li>
+<li><p>WW who was Abraham Lincoln</p></li>
+<li><p>WW play smooth jazz</p></li>
+<li><p>WW run example one</p></li>
 </ul>
 <p>Note the out of band phrases like ‘stop’, ‘pause’, ‘resume’ are often handled
 better by saying the wake word in isolation, then after the beep, speaking the command.

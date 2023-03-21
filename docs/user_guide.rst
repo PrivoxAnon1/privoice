@@ -79,14 +79,26 @@ The documentation will often use the following convention when describing comman
 WW what time is it.
 
 Which simply means you spoke the wake word (WW) first. Note you control what the 
-wake word is by modifying the value in the 'yava.ym; file. See :ref:`Configuration` for more 
-information on how to change the wake word.
+wake word is by modifying the value in the *yava.yml* file. See :ref:`Configuration` for more 
+information on how to change the wake word. The system ships with six skills installed by default. 
+
++ time and date skill
++ volume skill
++ weather skill
++ wiki skill
++ radio skill
++ example skill
+
+Typical usage might be 
 
 + WW what time is it
 + WW what is today's date
-+ WW who was Abraham Lincoln
++ WW <<brief delay>> set the volume to ninety percent
++ WW what is the volume set to
 + WW what is the weather forecast
-+ WW play jazz
++ WW who was Abraham Lincoln
++ WW play smooth jazz
++ WW run example one
 
 Note the out of band phrases like 'stop', 'pause', 'resume' are often handled 
 better by saying the wake word in isolation, then after the beep, speaking the command.

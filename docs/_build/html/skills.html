@@ -91,15 +91,36 @@ mkdir<span class="w"> </span>privoice_hello
 </pre></div>
 </div>
 <p>and restart it so it picks up your new skill.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/privoice_stop.sh
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/privoice_start.sh
 </pre></div>
 </div>
 <p>You should hear your skill say “hello world” when it is loaded.</p>
+<p>This works because when PriVoice first starts it scans the “skills/user_skills/” directory
+looking for directories that start with <strong>privoice_</strong>. If it finds one it then looks for a
+<strong>skill.json</strong> file and an <strong>__init__.py</strong> file and if it finds those two files in the subdirectory
+it assumes it has found a skill and it will attempt to start it by sourcing its virtual environment
+and then executing the “__init__.py” file in the background. This is why when you restarted
+PriVoice it automatically found your skill and executed it.</p>
+<p>Notice line 6 in the output above. It is calling the base class constructor. This is
+where you establish your skill’s ID. The skill ID must be unique across the system.
+It is how the message bus knows who to deliver a message to. In our example above,
+we used the skill ID ‘hello_skill’ as shown again, below</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>super<span class="o">()</span>.__init__<span class="o">(</span><span class="nv">skill_id</span><span class="o">=</span><span class="s1">&#39;hello_skill&#39;</span>,<span class="w"> </span><span class="nv">skill_category</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Your skill will receive any messages destined for the target skill ID ‘hello_skill’.
+Typically, your skill will respond to messages that are sent to it. For example, when you
+register an intent (<a class="reference internal" href="#register-intent">register_intent()</a>) you are telling the system to call a method you
+provide when a noun/verb match you specified is recognized.</p>
 <p>Obviously this is a contrived example but it demonstrates how
 simple it is to create and deploy a new skill.</p>
 <p>In the next section we will create a local skill repository which
 is just a directory that contains skills, and we will use the built
-in skill manager to install and run our skills.</p>
+in skill manager to install and run our skills from this repository.</p>
+<p>Keep in mind, if you just want to add a new skill to the system without going
+through the skill manager and setting up a repository, you can simply add the
+new skill directory under the “skills/user_skills/” directory as described above
+and it will work as expected.</p>
 </section>
 <section id="creating-a-local-repository">
 <h3>Creating a Local Repository<a class="headerlink" href="#creating-a-local-repository" title="Permalink to this heading">¶</a></h3>
@@ -176,12 +197,67 @@ It is located in framework/services/skill_mamager/repositories.json.</p>
 <p>The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills.</p>
 </section>
 </section>
+<section id="skill-operation">
+<h2>Skill Operation<a class="headerlink" href="#skill-operation" title="Permalink to this heading">¶</a></h2>
+<p>Typically a skill registers one or more intents and then waits for the user to utter something that matches the intent.
+Intents come in two basic types; commands or queries. In other words the system expects you to either ask it a question
+or give it a command. It does not currently know what to do with idle chatter and/or gossip and will tend to ignore this sort of input.</p>
+<p>As a result, an intent is defined as a sentence type (command or question) and a subject and a verb. For example</p>
+<p>Shut the door (subject = door, verb = Shut, type = command)</p>
+<p>What time is it? (subject = time, verb = what, type = question)</p>
+<p>When your skill is first loaded it registers any intents it may want to respond to and then it goes away and waits
+to be called. To have your method named ‘handle_close()’ invoked when someone says “shut the door” we would register the following intent</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>self.register_intent<span class="o">(</span><span class="s1">&#39;C&#39;</span>,<span class="w"> </span><span class="s1">&#39;shut&#39;</span>,<span class="w"> </span><span class="s1">&#39;door&#39;</span>,<span class="w"> </span>self.handle_close<span class="o">)</span>
+</pre></div>
+</div>
+<p>And the code for ‘handle_close’ should look something like this</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>def<span class="w"> </span>handle_close<span class="o">(</span>self,<span class="w"> </span>msg<span class="o">)</span>:
+<span class="w">    </span>self.speak<span class="o">(</span><span class="s2">&quot;You asked to close the door.&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Now, when someone says “shut the door” your “handle_close” method will be called with the message. This message
+contains information related to the actual sentence spoken by the user.</p>
+<p>For example, when the user says “WW what time is it” the “privoice_timedate” skill will be called with the following message</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span><span class="s1">&#39;msg_type&#39;</span>:<span class="w"> </span><span class="s1">&#39;utterance&#39;</span>,
+<span class="s1">&#39;source&#39;</span>:<span class="w"> </span><span class="s1">&#39;intent_service&#39;</span>,
+<span class="s1">&#39;target&#39;</span>:<span class="w"> </span><span class="s1">&#39;time_skill&#39;</span>,
+<span class="s1">&#39;data&#39;</span>:
+<span class="w">  </span><span class="o">{</span><span class="s1">&#39;utt&#39;</span>:
+<span class="w">    </span><span class="o">{</span><span class="s1">&#39;error&#39;</span>:<span class="w"> </span><span class="s1">&#39;&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;sentence_type&#39;</span>:<span class="w"> </span><span class="s1">&#39;Q&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;sentence&#39;</span>:<span class="w"> </span><span class="s1">&#39;what time is it?&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;normalized_sentence&#39;</span>:<span class="w"> </span><span class="s1">&#39;what time is it?&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;qtype&#39;</span>:<span class="w"> </span><span class="s1">&#39;qt_wh&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;np&#39;</span>:<span class="w"> </span><span class="s1">&#39;time&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;vp&#39;</span>:<span class="w"> </span><span class="s1">&#39;is&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;subject&#39;</span>:<span class="w"> </span><span class="s1">&#39;time&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;squal&#39;</span>:<span class="w"> </span><span class="s1">&#39;&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;question&#39;</span>:<span class="w"> </span><span class="s1">&#39;what&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;qword&#39;</span>:<span class="w"> </span><span class="s1">&#39;what&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;value&#39;</span>:<span class="w"> </span><span class="s1">&#39;&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;raw_input&#39;</span>:<span class="w"> </span><span class="s1">&#39;computer what time is it?&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;verb&#39;</span>:<span class="w"> </span><span class="s1">&#39;is&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;aux_verb&#39;</span>:<span class="w"> </span><span class="s1">&#39;time&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;rule&#39;</span>:<span class="w"> </span><span class="s1">&#39;VP NP&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;tree&#39;</span>:<span class="w"> </span><span class="s1">&#39;what time (VP is (NP it)) ?&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;subtype&#39;</span>:<span class="w"> </span><span class="s1">&#39;&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;from_skill_id&#39;</span>:<span class="w"> </span><span class="s1">&#39;&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;skill_id&#39;</span>:<span class="w"> </span><span class="s1">&#39;time_skill&#39;</span>,
+<span class="w">    </span><span class="s1">&#39;intent_match&#39;</span>:<span class="w"> </span><span class="s1">&#39;Q:time:what&#39;</span><span class="o">}</span>,
+<span class="w">    </span><span class="s1">&#39;subtype&#39;</span>:<span class="w"> </span><span class="s1">&#39;utt&#39;</span>
+<span class="w">  </span><span class="o">}</span>,
+<span class="s1">&#39;ts&#39;</span>:<span class="w"> </span><span class="s1">&#39;2023-03-21 14:06:22&#39;</span><span class="o">}</span>
+</pre></div>
+</div>
+<p>The skill does not need to do anything with the message. It is provided as input and the skill may use it or ignore it.</p>
+</section>
 <section id="skill-api">
 <h2>Skill API<a class="headerlink" href="#skill-api" title="Permalink to this heading">¶</a></h2>
-<p>The ‘example1’ skill located in the user_skills/ directory is a good example
-of how a basic skill can communicate with the user. The time and date skill
-is an example of a minimalistic user skill.</p>
-<p>All skills that inherit from the PriVoice class have the following methods available to them.</p>
+<p>The example skill located in the “skills/user_skills/privoice_example” directory is a good example
+of how a basic skill can communicate with the user. The time and date (“skills/user_skills/privoice_timedate”) skill
+is an example of a minimalistic user skill. These are good skills to use as a template for
+creating a new skill.</p>
+<p>All skills that inherit from the PriVoice class have the following built-in methods available to them.</p>
 <section id="speak">
 <h3>speak()<a class="headerlink" href="#speak" title="Permalink to this heading">¶</a></h3>
 <p>The speak call is used to convert a text string to wav data and then play the wav data on the audio output channel.
@@ -438,6 +514,7 @@ def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-local-repository">Creating a Local Repository</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#skill-operation">Skill Operation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skill-api">Skill API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#speak">speak()</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sync-speak">sync_speak()</a></li>

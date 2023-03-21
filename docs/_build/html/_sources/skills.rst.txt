@@ -81,16 +81,43 @@ and restart it so it picks up your new skill.
 
 .. code-block:: bash
 
-   ./scripts/privoice_stop.sh
+   ./scripts/privoice_start.sh
 
 You should hear your skill say "hello world" when it is loaded.
+
+This works because when PriVoice first starts it scans the "skills/user_skills/" directory
+looking for directories that start with **privoice_**. If it finds one it then looks for a
+**skill.json** file and an **__init__.py** file and if it finds those two files in the subdirectory
+it assumes it has found a skill and it will attempt to start it by sourcing its virtual environment
+and then executing the "__init__.py" file in the background. This is why when you restarted 
+PriVoice it automatically found your skill and executed it. 
+
+Notice line 6 in the output above. It is calling the base class constructor. This is 
+where you establish your skill's ID. The skill ID must be unique across the system. 
+It is how the message bus knows who to deliver a message to. In our example above,
+we used the skill ID 'hello_skill' as shown again, below 
+
+.. code-block:: bash
+
+   super().__init__(skill_id='hello_skill', skill_category='user')
+
+
+Your skill will receive any messages destined for the target skill ID 'hello_skill'.
+Typically, your skill will respond to messages that are sent to it. For example, when you
+register an intent (`register_intent()`_) you are telling the system to call a method you 
+provide when a noun/verb match you specified is recognized.
 
 Obviously this is a contrived example but it demonstrates how 
 simple it is to create and deploy a new skill.
 
 In the next section we will create a local skill repository which 
 is just a directory that contains skills, and we will use the built 
-in skill manager to install and run our skills.
+in skill manager to install and run our skills from this repository.
+
+Keep in mind, if you just want to add a new skill to the system without going
+through the skill manager and setting up a repository, you can simply add the 
+new skill directory under the "skills/user_skills/" directory as described above 
+and it will work as expected.
 
 ---------------------------
 Creating a Local Repository
@@ -184,15 +211,81 @@ Edit this file to point to your new repository. Change the values MYHOME and MYR
 
 The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills.
 
+===============
+Skill Operation
+===============
+Typically a skill registers one or more intents and then waits for the user to utter something that matches the intent. 
+Intents come in two basic types; commands or queries. In other words the system expects you to either ask it a question 
+or give it a command. It does not currently know what to do with idle chatter and/or gossip and will tend to ignore this sort of input.
+
+As a result, an intent is defined as a sentence type (command or question) and a subject and a verb. For example
+
+Shut the door (subject = door, verb = Shut, type = command)
+
+What time is it? (subject = time, verb = what, type = question)
+
+When your skill is first loaded it registers any intents it may want to respond to and then it goes away and waits
+to be called. To have your method named 'handle_close()' invoked when someone says "shut the door" we would register the following intent
+
+.. code-block:: bash
+
+   self.register_intent('C', 'shut', 'door', self.handle_close)
+
+And the code for 'handle_close' should look something like this 
+
+.. code-block:: bash
+
+       def handle_close(self, msg):
+           self.speak("You asked to close the door.")
+
+Now, when someone says "shut the door" your "handle_close" method will be called with the message. This message
+contains information related to the actual sentence spoken by the user.
+
+For example, when the user says "WW what time is it" the "privoice_timedate" skill will be called with the following message
+
+.. code-block:: bash
+
+  {'msg_type': 'utterance', 
+  'source': 'intent_service', 
+  'target': 'time_skill', 
+  'data': 
+    {'utt': 
+      {'error': '', 
+      'sentence_type': 'Q', 
+      'sentence': 'what time is it?', 
+      'normalized_sentence': 'what time is it?', 
+      'qtype': 'qt_wh', 
+      'np': 'time', 
+      'vp': 'is', 
+      'subject': 'time', 
+      'squal': '', 
+      'question': 'what', 
+      'qword': 'what', 
+      'value': '', 
+      'raw_input': 'computer what time is it?', 
+      'verb': 'is', 
+      'aux_verb': 'time', 
+      'rule': 'VP NP', 
+      'tree': 'what time (VP is (NP it)) ?', 
+      'subtype': '', 
+      'from_skill_id': '', 
+      'skill_id': 'time_skill', 
+      'intent_match': 'Q:time:what'}, 
+      'subtype': 'utt'
+    }, 
+  'ts': '2023-03-21 14:06:22'}
+
+The skill does not need to do anything with the message. It is provided as input and the skill may use it or ignore it.
+
 =========
 Skill API
 =========
-The 'example1' skill located in the user_skills/ directory is a good example
-of how a basic skill can communicate with the user. The time and date skill
-is an example of a minimalistic user skill.
+The example skill located in the "skills/user_skills/privoice_example" directory is a good example
+of how a basic skill can communicate with the user. The time and date ("skills/user_skills/privoice_timedate") skill
+is an example of a minimalistic user skill. These are good skills to use as a template for
+creating a new skill. 
 
-All skills that inherit from the PriVoice class have the following methods available to them.
-
+All skills that inherit from the PriVoice class have the following built-in methods available to them.
 
 -------
 speak()
