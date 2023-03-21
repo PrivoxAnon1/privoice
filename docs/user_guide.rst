@@ -27,7 +27,8 @@ To stop the PriVoice voice assistant type
    ./scripts/privoice_stop.sh
 
 Note - you may have to hit Ctl+C first if you tail'ed the log files
-as shown above.
+as shown above. All this assumes you are in the base directory where 
+you installed PriVoice.
 
 =================
 General Operation
@@ -79,8 +80,10 @@ The documentation will often use the following convention when describing comman
 WW what time is it.
 
 Which simply means you spoke the wake word (WW) first. Note you control what the 
-wake word is by modifying the value in the *yava.yml* file. See :ref:`Configuration` for more 
-information on how to change the wake word. The system ships with six skills installed by default. 
+wake word is by modifying the value in the **yava.yml** file. See :ref:`Configuration` for more 
+information on how to change the wake word. 
+
+The system ships with six skills installed by default. 
 
 + time and date skill
 + volume skill
@@ -100,7 +103,7 @@ Typical usage might be
 + WW play smooth jazz
 + WW run example one
 
-Note the out of band phrases like 'stop', 'pause', 'resume' are often handled 
+Note the out of band (OOB) phrases like 'stop', 'pause', 'resume' are often handled 
 better by saying the wake word in isolation, then after the beep, speaking the command.
 For example
 
@@ -146,7 +149,6 @@ Default System Skills
 + volume skill
 + fallback skill
 + media skill
-+ alarm skill
 
 =====================
 Default User Skills

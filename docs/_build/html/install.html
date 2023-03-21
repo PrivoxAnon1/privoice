@@ -64,8 +64,8 @@ is working correctly open a terminal and enter this command</p>
 corrected before you can continue. See the <a class="reference internal" href="#installation-issues">Installation Issues</a>. section
 below for more help with this.</p>
 </section>
-<section id="install">
-<h2>Install<a class="headerlink" href="#install" title="Permalink to this heading">¶</a></h2>
+<section id="clone-repo">
+<h2>Clone Repo<a class="headerlink" href="#clone-repo" title="Permalink to this heading">¶</a></h2>
 <p>Assuming the commands ‘arecord’ and ‘aplay’ work as expected, you install the system as follows</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># checkout the repository</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/PrivoxAnon1/privoice.git
@@ -77,11 +77,10 @@ git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Privo
 ./scripts/linux_install.sh
 </pre></div>
 </div>
-<p>It may ask you for your sudo password as it will install ffmpeg and mpg123 if not
+<p>You may be asked for your sudo password as it will install ffmpeg and mpg123 if not
 already installed. These are system applications, not Python modules.</p>
 <p>The install script will create a new virtual environment and install everything
-into the virtual environment except for ffmpeg and mpg123 (which is used to play
-mp3 media).</p>
+into the virtual environment.</p>
 <p>The installation should take anywhere from 2 minutes to 20 minutes depending on your system.
 Once it has completed you should see something like this on your screen</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Successfully<span class="w"> </span>uninstalled<span class="w"> </span>numba-0.56.4
@@ -107,7 +106,7 @@ Default<span class="w"> </span>skills<span class="w"> </span>installed
 Risc board or Raspberry Pi. In this case you will need to figure out how to get the module installed in your
 environment. Isolating the module and just getting one module at a time to install is usually the best approach.</p>
 <p>Linux device names are the names used by the <em>aplay</em> and <em>arecord</em> commands. In most cases you will not need to
-worry about this, but if you do there is an entry in the yava.yml file which holds this value and you can simply
+worry about this, but if you do there is an entry in the <strong>yava.yml</strong> file which holds this value and you can simply
 set it there. This value is the value used with the ‘-D’ command line parameter. For example</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aplay<span class="w"> </span>-D<span class="w"> </span>plughw:VF_ASR_<span class="o">(</span>L<span class="o">)</span>
 </pre></div>
@@ -118,7 +117,7 @@ set it there. This value is the value used with the ‘-D’ command line parame
 <h3>Device Names<a class="headerlink" href="#device-names" title="Permalink to this heading">¶</a></h3>
 <p>If either <em>arecord</em> or <em>aplay</em> are not working you will need to correct this first. These are foundational to the system.</p>
 <p>Assuming you have hardware and it is working the most likely issue is the ‘.asourdrc’ file. This can be worked around
-by setting the device name in the yava.yml file. Finding the correct device name can be a pain. For example here is
+by setting the device name in the <strong>yava.yml</strong> file. Finding the correct device name can be a pain. For example here is
 the output of the command <strong>‘aplay -L’</strong> on one laptop …</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>null
 <span class="w">  </span>Discard<span class="w"> </span>all<span class="w"> </span>samples<span class="w"> </span><span class="o">(</span>playback<span class="o">)</span><span class="w"> </span>or<span class="w"> </span>generate<span class="w"> </span>zero<span class="w"> </span>samples<span class="w"> </span><span class="o">(</span>capture<span class="o">)</span>
@@ -245,7 +244,8 @@ usbstream:CARD<span class="o">=</span>acp
 <span class="w">  </span>USB<span class="w"> </span>Stream<span class="w"> </span>Output
 </pre></div>
 </div>
-<p>You can also run</p>
+<p>The command <strong>arecord -L</strong> shows the same for the input devices on your system.
+You can also run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>test/list_input_devices.py
 </pre></div>
 </div>
@@ -274,8 +274,8 @@ It should be noted the device name must be derived from the output by combining 
 </section>
 <section id="alsa-names">
 <h3>ALSA Names<a class="headerlink" href="#alsa-names" title="Permalink to this heading">¶</a></h3>
-<p>The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the yava.yml file.</p>
-<p>Again, finding the value is often not straightforward. For example, here is some output from a laptop</p>
+<p>The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the <strong>yava.yml</strong> file.</p>
+<p>Finding the ALSA mixer name for your speaker and microphone is often not straightforward. For example, here is some ALSA mixer output from a laptop</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>amixer<span class="w"> </span>scontrols
 
 Simple<span class="w"> </span>mixer<span class="w"> </span>control<span class="w"> </span><span class="s1">&#39;IEC958&#39;</span>,0
@@ -355,7 +355,7 @@ Found<span class="w"> </span>card<span class="w"> </span><span class="m">2</span
 To<span class="w"> </span>change<span class="w"> </span>your<span class="w"> </span>volume<span class="w"> </span>use<span class="w"> </span>this<span class="w"> </span><span class="nb">command</span><span class="w"> </span>amixer<span class="w"> </span>-c<span class="w"> </span><span class="m">2</span><span class="w"> </span>sset<span class="w"> </span>Master<span class="w"> </span><span class="m">75</span>%
 </pre></div>
 </div>
-<p>Note - the entire combination must be entered in the yava.yml file. For example</p>
+<p>Note - the entire combination must be entered in the <strong>yava.yml</strong> file. For example</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-<span class="w"> </span>Advanced:
 <span class="w">  </span>CrappyAEC:<span class="w"> </span>n
 <span class="w">  </span>MasterControlName:<span class="w"> </span><span class="s2">&quot;-c 2 &#39;Master&#39;&quot;</span>
@@ -367,7 +367,7 @@ To<span class="w"> </span>change<span class="w"> </span>your<span class="w"> </s
 <span class="w">  </span>Platform:<span class="w"> </span>l
 </pre></div>
 </div>
-<p>Or if no card is required.</p>
+<p>Or if no card is required you can drop the “-c”.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-<span class="w"> </span>Advanced:
 <span class="w">  </span>CrappyAEC:<span class="w"> </span>n
 <span class="w">  </span>MasterControlName:<span class="w"> </span><span class="s2">&quot;&#39;Master&#39;&quot;</span>
@@ -409,9 +409,9 @@ BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<sp
 <p>Hit Ctl+C at any time to exit the program.</p>
 <p>The output shown above lists several important values.</p>
 <p>First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string.</p>
-<p>From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time.</p>
-<p>If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy.</p>
-<p>You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two.</p>
+<p>From the output we can see that using the <em>small.en</em> model we are getting close to a 1:1 ratio of input time to transcribe time.</p>
+<p>If we were to change the STT model in the <strong>yava.yml</strong> file to <em>tiny.en</em> and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the <em>tiny.en</em> model is below 1GB.</p>
+<p>You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.</p>
 </section>
 <section id="operational-issues">
 <h2>Operational Issues<a class="headerlink" href="#operational-issues" title="Permalink to this heading">¶</a></h2>
@@ -441,18 +441,18 @@ Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </
 torch.cuda.OutOfMemoryError:<span class="w"> </span>CUDA<span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span>memory.<span class="w"> </span>Tried<span class="w"> </span>to<span class="w"> </span>allocate<span class="w"> </span><span class="m">26</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span>GPU<span class="w"> </span><span class="m">0</span><span class="p">;</span><span class="w"> </span><span class="m">3</span>.81<span class="w"> </span>GiB<span class="w"> </span>total<span class="w"> </span>capacity<span class="p">;</span><span class="w"> </span><span class="m">3</span>.02<span class="w"> </span>GiB<span class="w"> </span>already<span class="w"> </span>allocated<span class="p">;</span><span class="w"> </span><span class="m">3</span>.44<span class="w"> </span>MiB<span class="w"> </span>free<span class="p">;</span><span class="w"> </span><span class="m">3</span>.27<span class="w"> </span>GiB<span class="w"> </span>reserved<span class="w"> </span><span class="k">in</span><span class="w"> </span>total<span class="w"> </span>by<span class="w"> </span>PyTorch<span class="o">)</span><span class="w"> </span>If<span class="w"> </span>reserved<span class="w"> </span>memory<span class="w"> </span>is<span class="w"> </span>&gt;&gt;<span class="w"> </span>allocated<span class="w"> </span>memory<span class="w"> </span>try<span class="w"> </span>setting<span class="w"> </span>max_split_size_mb<span class="w"> </span>to<span class="w"> </span>avoid<span class="w"> </span>fragmentation.<span class="w">  </span>See<span class="w"> </span>documentation<span class="w"> </span><span class="k">for</span><span class="w"> </span>Memory<span class="w"> </span>Management<span class="w"> </span>and<span class="w"> </span>PYTORCH_CUDA_ALLOC_CONF
 </pre></div>
 </div>
-<p>Ouch, my GPU ran out of memory. WTF? It has like 4GB.</p>
-<p>The STT models require anywhere from approximately 1GB to upwards of 10GB. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch) you will be limited to the GPU RAM.</p>
+<p>Ouch, my GPU ran out of memory. What happened? It has like 4GB.</p>
+<p>The STT models require anywhere from just under 1GB to upwards of 10GB of memory. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch though there are ways to overide this) you will be limited to the GPU RAM.</p>
 <p>For example if a laptop has 4GB of GPU RAM it can only run the small model and under, however, if you disable the GPU you can run any model that fits in your available memory. Of course this assumes your CPU has more memory available than your GPU. If your system has more than 32GB of RAM you should be able to run any model.</p>
-<p>In general the ‘tiny’ model works fine but you can always edit the yava.yml file and change the model.</p>
+<p>In general the <em>tiny</em> model works fine for most applications but you can always edit the <strong>yava.yml</strong> file and change the model.</p>
 <p>STT models have several attributes …</p>
 <ul class="simple">
 <li><p>Transcription Speed</p></li>
 <li><p>Transcription Accuracy</p></li>
 <li><p>Memory Consumption</p></li>
 </ul>
-<p>To change the model simply change the Recognizer:ModelName value in the yava.yml file.
-In the output below, the value is set to ‘small.en’.</p>
+<p>To change the model simply change the Recognizer:ModelName value in the <strong>yava.yml</strong> file.
+In the output below, the value is set to <em>small.en</em>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Recognizer:
 <span class="w">  </span><span class="c1"># vad mode controls silence</span>
 <span class="w">  </span><span class="c1"># detection sensitivity.</span>
@@ -509,7 +509,7 @@ In the output below, the value is set to ‘small.en’.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Install PriVoice</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verify-system">Verify System</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#install">Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clone-repo">Clone Repo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-issues">Installation Issues</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#device-names">Device Names</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#alsa-names">ALSA Names</a></li>
@@ -521,7 +521,7 @@ In the output below, the value is set to ‘small.en’.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide.html">User’s Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="skills.html">Creating Skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intent.html">Intent Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>

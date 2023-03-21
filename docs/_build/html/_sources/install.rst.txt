@@ -44,9 +44,9 @@ corrected before you can continue. See the `Installation Issues`_. section
 below for more help with this.
 
 
-=======
-Install
-=======
+==========
+Clone Repo
+==========
 Assuming the commands 'arecord' and 'aplay' work as expected, you install the system as follows 
 
 .. code-block:: bash
@@ -60,12 +60,11 @@ Assuming the commands 'arecord' and 'aplay' work as expected, you install the sy
    # run the installation script
    ./scripts/linux_install.sh
 
-It may ask you for your sudo password as it will install ffmpeg and mpg123 if not 
+You may be asked for your sudo password as it will install ffmpeg and mpg123 if not 
 already installed. These are system applications, not Python modules.
 
 The install script will create a new virtual environment and install everything 
-into the virtual environment except for ffmpeg and mpg123 (which is used to play 
-mp3 media).
+into the virtual environment.
 
 The installation should take anywhere from 2 minutes to 20 minutes depending on your system.
 Once it has completed you should see something like this on your screen 
@@ -98,7 +97,7 @@ Risc board or Raspberry Pi. In this case you will need to figure out how to get 
 environment. Isolating the module and just getting one module at a time to install is usually the best approach.
 
 Linux device names are the names used by the *aplay* and *arecord* commands. In most cases you will not need to 
-worry about this, but if you do there is an entry in the yava.yml file which holds this value and you can simply 
+worry about this, but if you do there is an entry in the **yava.yml** file which holds this value and you can simply 
 set it there. This value is the value used with the '-D' command line parameter. For example 
 
 
@@ -116,7 +115,7 @@ Device Names
 If either *arecord* or *aplay* are not working you will need to correct this first. These are foundational to the system. 
 
 Assuming you have hardware and it is working the most likely issue is the '.asourdrc' file. This can be worked around 
-by setting the device name in the yava.yml file. Finding the correct device name can be a pain. For example here is
+by setting the device name in the **yava.yml** file. Finding the correct device name can be a pain. For example here is
 the output of the command **'aplay -L'** on one laptop ...
 
 
@@ -246,6 +245,7 @@ the output of the command **'aplay -L'** on one laptop ...
     acp
     USB Stream Output
 
+The command **arecord -L** shows the same for the input devices on your system.
 You can also run 
 
 .. code-block:: bash
@@ -289,9 +289,9 @@ You would test this device as follows
 ----------
 ALSA Names
 ----------
-The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the yava.yml file. 
+The ALSA mixer is used to control the volume. If the default install does not allow you to set the volume you will probably need to set the value in the **yava.yml** file. 
 
-Again, finding the value is often not straightforward. For example, here is some output from a laptop
+Finding the ALSA mixer name for your speaker and microphone is often not straightforward. For example, here is some ALSA mixer output from a laptop
 
 .. code-block:: bash
 
@@ -382,7 +382,7 @@ You can run this command which will try to auto-detect your card and master cont
 
   To change your volume use this command amixer -c 2 sset Master 75%
 
-Note - the entire combination must be entered in the yava.yml file. For example 
+Note - the entire combination must be entered in the **yava.yml** file. For example 
 
 .. code-block:: bash
 
@@ -397,7 +397,7 @@ Note - the entire combination must be entered in the yava.yml file. For example
     Platform: l
 
 
-Or if no card is required.
+Or if no card is required you can drop the "-c".
 
 .. code-block:: bash
 
@@ -452,11 +452,11 @@ The output shown above lists several important values.
 
 First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
 
-From the output we can see that using the small.en model we are getting close to a 1:1 ratio of input time to transcribe time. 
+From the output we can see that using the *small.en* model we are getting close to a 1:1 ratio of input time to transcribe time. 
 
-If we were to change the STT model in the yava.yml file to tiny.en and restart we would expect to see the time to transcribe decrease along with the accuracy. 
+If we were to change the STT model in the **yava.yml** file to *tiny.en* and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the *tiny.en* model is below 1GB. 
 
-You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. Some folks prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two.
+You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.
 
 ==================
 Operational Issues
@@ -490,13 +490,13 @@ Nothing is more disappointing than seeing the following output
       return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
   torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 26.00 MiB (GPU 0; 3.81 GiB total capacity; 3.02 GiB already allocated; 3.44 MiB free; 3.27 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
 
-Ouch, my GPU ran out of memory. WTF? It has like 4GB.
+Ouch, my GPU ran out of memory. What happened? It has like 4GB.
 
-The STT models require anywhere from approximately 1GB to upwards of 10GB. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch) you will be limited to the GPU RAM. 
+The STT models require anywhere from just under 1GB to upwards of 10GB of memory. If you get an out of memory message you will need to use a smaller model. If you run the model on your GPU (this is automatically determined by PyTorch though there are ways to overide this) you will be limited to the GPU RAM. 
 
 For example if a laptop has 4GB of GPU RAM it can only run the small model and under, however, if you disable the GPU you can run any model that fits in your available memory. Of course this assumes your CPU has more memory available than your GPU. If your system has more than 32GB of RAM you should be able to run any model. 
 
-In general the 'tiny' model works fine but you can always edit the yava.yml file and change the model. 
+In general the *tiny* model works fine for most applications but you can always edit the **yava.yml** file and change the model. 
 
 STT models have several attributes ...
 
@@ -504,8 +504,8 @@ STT models have several attributes ...
 + Transcription Accuracy
 + Memory Consumption
 
-To change the model simply change the Recognizer:ModelName value in the yava.yml file. 
-In the output below, the value is set to 'small.en'.
+To change the model simply change the Recognizer:ModelName value in the **yava.yml** file. 
+In the output below, the value is set to *small.en*.
 
 .. code-block:: bash
 

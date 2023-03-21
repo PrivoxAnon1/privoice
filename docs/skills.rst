@@ -1,15 +1,14 @@
-Creating Skills
-***************
+Skills
+******
 
 .. toctree::
    :maxdepth: 2
 
 .. _skills:
 
-======
-Skills
-======
-
+===============
+Creating Skills
+===============
 PriVoice skills are simple Python programs that run in their own 
 virtual environment using their own Python interpreter. This level
 of isolation ensures skills don't interfere with each other. 
@@ -17,6 +16,12 @@ of isolation ensures skills don't interfere with each other.
 If skills need to communicate they should do so using the message
 bus. The message bus is a simple websocket server and the send_msg()
 command is built into all PriVoice skills.
+
+Skills typically respond to spoken questions or commands. All skills
+have a **register_intent()** method and a **bus.on()** method which
+allows them to link an incoming message to a method. By default skills
+are asynchronous, however, facilities exist to run skills in a synchronous 
+manner.
 
 -----------
 Hello World
@@ -92,6 +97,7 @@ it assumes it has found a skill and it will attempt to start it by sourcing its 
 and then executing the "__init__.py" file in the background. This is why when you restarted 
 PriVoice it automatically found your skill and executed it. 
 
+**All skills must have a unique skill ID**.
 Notice line 6 in the output above. It is calling the base class constructor. This is 
 where you establish your skill's ID. The skill ID must be unique across the system. 
 It is how the message bus knows who to deliver a message to. In our example above,

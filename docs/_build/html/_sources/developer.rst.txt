@@ -78,7 +78,7 @@ in the method named 'output_focus_determination()'.
 ----------------------
 Out of Band Processing
 ----------------------
-An out of band message is a message which requires processing outside the normal
+An out of band (OOB) message is a message which requires processing outside the normal
 process flow. For example, if the user says "stop" this is considered a meta input
 and it requires special processing rather than just sending it to the currently 
 active skill. 

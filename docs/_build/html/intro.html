@@ -36,17 +36,37 @@
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>PriVoice is a full featured, privacy respecting, open source voice assistant.
 It is comparable to products like Alexa and Suri with several key differences.</p>
 <ul class="simple">
 <li><p>Runs locally with no network connection required.</p></li>
 <li><p>Privacy respecting, secure operation. No data leaves your system.</p></li>
-<li><p>NLP (Noun/Verb) Intent Matching.</p></li>
+<li><p>NLP (Noun/Verb) intent matching.</p></li>
 <li><p>Unrestricted use of user contributed skills.</p></li>
 <li><p>Unlimited skill stackability. Hyper-link based VUI.</p></li>
 </ul>
-<p>Current constraints on quality STT like poor echo cancellation, CPU processing power, GPU/TPUs (or lack thereof) and RAM (not enough) will eventually disappear at which point a fully functional, completely local privacy respecting framework will become the norm. PriVoice is not designed for inferior hardware and if you run it on low end systems you will most likely be disappointed. That being said, most laptops or desktops with a headset or decent mic/speaker combination can run PriVoice with no issues.</p>
+<p>Current constraints on quality STT like poor echo cancellation, CPU processing power, GPU/TPUs (or lack thereof) and RAM (not enough) will eventually disappear at which point a fully functional, completely local, privacy respecting voice framework will become the norm. PriVoice is not designed for inferior hardware and if you run it on low end systems you will most likely be disappointed. That being said, most laptops or desktops with a headset or decent mic/speaker combination can run PriVoice with no issues.</p>
 <p>PriVoice was created to address the limitations inherrent in most existing voice frameworks. Issues arising from skill interractions, channel focus, out of band recognition, barge-in and skill isolation are of no concern to the PriVoice skill developer. The skill developer is free to assume this all just works as it is supposed to and is free to concentrate on whatever the skill is supposed to do.</p>
+<p>PriVoice runs STT and TTS locally and does not send any data outside of your device. This is true unless you choose to use a skill which requires internet access (like the wiki skill or the weather skill which are installed by default) in which case requests are made to those sites but no information other than the query is shared. Even this behavior may be disabled by simply removing the following skills from the default installation, in which case the device will operate completely locally with no internet connection required.</p>
+</section>
+<section id="skills-which-access-the-internet">
+<h2>Skills Which Access the Internet<a class="headerlink" href="#skills-which-access-the-internet" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>wiki skill</p></li>
+<li><p>radio skill</p></li>
+<li><p>weather skill</p></li>
+</ul>
+<p>One of the goals of PriVoice is to enable developers to create voice enabled applications without having to sacrifice their privacy, or the privacy of their users. There is no skill store or approval process. Some existing skills for PriVoice include</p>
+<ul class="simple">
+<li><p>email skill</p></li>
+<li><p>duck duck go skill</p></li>
+<li><p>youtube skill</p></li>
+<li><p>home assistant skill</p></li>
+<li><p>npr news skill</p></li>
+</ul>
+</section>
 </section>
 
 
@@ -67,12 +87,14 @@ It is comparable to products like Alexa and Suri with several key differences.</
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul class="simple">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skills-which-access-the-internet">Skills Which Access the Internet</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Install PriVoice</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide.html">User’s Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="skills.html">Creating Skills</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skills.html">Skills</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intent.html">Intent Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>

@@ -18,19 +18,20 @@ The interpreter takes in raw text messages and converts them to one of four mess
 + Q_OOB  - qualified out of band (example - computer stop)
 + U_OOB  - unqualified out of band (example - stop)
 + Q_UTT  - qualified utterance (computer what time is it)
-+ WW     - wake word detected (just the wake word, not the ww + utt, that is msg Q_UTT)
++ WW     - wake word detected (computer)
+  just the wake word, not the WW + utt, that is msg Q_UTT
 
 It should be noted this code is triggered by a RAW message and it does not repeat this message.
 This code is basically a simple stateful stream parser designed to handle the concept of a 
 wake word (which can time out) and out of band (OOB) utterances.
 
 Out of band processing is handled by the system skill and is described in more detail on
-the Developer page. 
+the :doc:`Developer Guide </developer>` page.
 
 A *qualified utterance* (Q_UTT) is an utterance which is either preceeded by the wake word (or wake 
 word phrase) or was received while the interpreter was in the *activated* state. The activated
 state is a period of time from when the user speaks the wake word in isolation, to when the 
-time out period is reached. All of these parameters are available in the 'yava.yml' configuration
+time-out period is reached. All of these parameters are available in the **yava.yml** configuration
 file in the base directory.
 
 Qualified utterances are divided into one of three utterance types 
