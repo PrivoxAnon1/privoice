@@ -172,4 +172,16 @@ this is a system monitor which could see all messages, even those not destined f
 is accomplished in the socket server by sending out all messages to the special endpoint named 
 'system_monitor'. 
 
+------------
+Design Goals
+------------
+Skills should be able to interrupt each other in an orderly manner and should be isolated from other skills. Most voice frameworks are limited to one active skill and one background skill. Skills can not interrupt each other to any depth. While this may be the way some users want their system to behave the framework should not impose these arbitrary limitations on the Voice UI (VUI), in fact this concept is central to the implementation of hyper-links, and the natural way we interract with the web. To this end PriVoice supports unlimited skill stackability; the ability for skills to interrupt each other in an orderly manner.
+
+To better understand this objective, consider asking your voice assistant to play the Beatles, then while the song is playing, ask who were the Beatles and while that answer is playing ask who was John Lennon. From a voice UI perspective you are linking from one article to the next with the expectation being that when you go back (or stop/exit the current article) you will pick up where you left off with the previous one. 
+
+Most existing frameworks when given this scenario will not behave in the expected manner. PriVoice skills are governed by a strict set of consistent rules which determine what will happen when one category of skill (User, System, Media, QnA) interrupts another. PriVoice skills need not concern themselves with system level issues like pause, resume, stop, skip, etc. These are handled seamlessly by the underlying framework.
+
+PriVoice also supports skill isolation. Each skill runs in its own process space. Skills operate out of their own virtual environment. Adding skills does not pollute the virtual environment of the system or other skills.
+
+PriVoice provides NLP based intent matching and out of band recognition. PriVoice uses a concept called shallow parsing (based on the concept of shallow tokens, a semi lexical structure or SLS) to extract specific meaning from text designed for voice assistants. While the results are similar to those provided using packages like spaCy, the approach is far different and allow for intent clash detection and true machine learning for unrecognized lexical structures. See the details on shallow parsing and true AI for more information on the basic concepts and strategies employed. From a high level most voice frameworks rely on regex and static pattern matching for intent handling while PriVoice uses **subject/verb** matching.
 

@@ -4,6 +4,8 @@ Note:
 
 Official Documentation may be found at https://privoice.readthedocs.io
 
+User Skills repository is located at https://github.com/PrivoxAnon1/privoice_skills
+
 
 Overview
 --------
