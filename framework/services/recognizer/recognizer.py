@@ -145,15 +145,19 @@ class SilenceDetector:
                 self.state = 'collecting'
                 self.speech_buff = buffer
         else:
-            if not self.vad.is_speech(buffer, self.sample_rate):
-                if len(self.speech_buff) > self.min_utterance_bytes:
-                    b1 = self.speech_buff[ : ]
-                    self.queue.put(b1)
-                    self.state = 'idle'
+            try:
+                if not self.vad.is_speech(buffer, self.sample_rate):
+                    if len(self.speech_buff) > self.min_utterance_bytes:
+                        b1 = self.speech_buff[ : ]
+                        self.queue.put(b1)
+                        self.state = 'idle'
+                    else:
+                        self.speech_buff = b''
                 else:
-                    self.speech_buff = b''
-            else:
-                self.speech_buff += buffer
+                    self.speech_buff += buffer
+            except:
+                print("EXCEPTION, need to reset vad!!!")
+
 
 if __name__ == "__main__":
     sd = SilenceDetector()
