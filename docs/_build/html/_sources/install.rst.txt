@@ -246,6 +246,21 @@ the output of the command **'aplay -L'** on one laptop ...
     USB Stream Output
 
 The command **arecord -L** shows the same for the input devices on your system.
+**Note!** - if you change the recording device (for *arecord*) you **must** also manually
+edit the file *framework/services/recognizer/recognizer.sh* as follows ...
+
+.. code-block:: bash
+
+   Change the line 
+     arecord -f s16_le -c 1 -r 16000 | python -W ignore framework/services/recognizer/recognizer.py
+
+   To
+     arecord -DDEVICE_NAME -f s16_le -c 1 -r 16000 | python -W ignore framework/services/recognizer/recognizer.py
+
+
+Where DEVICE_NAME is the device name you need to use with the *arecord* utility. In other words 
+we are adding a device name to the command line we use to execute the recognizer.
+
 You can also run 
 
 .. code-block:: bash
@@ -259,7 +274,7 @@ To get a list of device names on your system. Of course this won't run unless yo
    . ./scripts/init_env.sh
 
 
-Hopefully your output is far less than this mess. Regardless, you will need to test each device name until you hit the correct one.
+Hopefully your output is far less than the output shown above (it usually is). Regardless, you will need to test each device name until you hit the correct one.
 It should be noted the device name must be derived from the output by combining some of the output. This amounts to removing the 
 'CARD=' from the output line. For example using the output line
 
@@ -462,6 +477,9 @@ You should experiment with this setting until you are satisfied it is working in
 Operational Issues
 ==================
 
+---------------
+Memory Concerns
+---------------
 Nothing is more disappointing than seeing the following output 
 
 .. code-block:: bash
@@ -539,4 +557,24 @@ Supported values are
 + large
 + large-v2
 
+-----------------
+Microphone Issues
+-----------------
+Another source of pain if often the microphone level. If you are running a desktop you can simply use the toolbar to set your microphone level, however, on headless systems you need to use the command line.
+
+The *amixer* command does not always set the microphone level correctly but the *pacmd* utility seems to work well when present.
+There are two helpful files in the *test/* subdirectory. They allow you to *set* and *get* the microphone level using the *pacmd* command. 
+
+.. code-block:: bash
+
+  $ python test/get_mic_pacmd.py
+  32127
+
+  $ python test/set_mic_pacmd.py 65000
+
+  $ python test/get_mic_pacmd.py
+  65000
+
+You should set the microphone to around 32000 and then run the recognizer (./framework/services/recognizer/recognizer.sh) and see how well your voice is being recognized.
+You can either stop the recognizer and then set the volume and rerun the recognizer or you can open a second terminal and change the volume while the recognizer is running in the first terminal.
 
