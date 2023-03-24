@@ -59,19 +59,11 @@ class UttProc:
         self.stop_aliases = ['stop', 'terminate', 'abort', 'cancel', 'kill', 'exit']
 
         # register message handlers
-        """
-        self.bus.on('register_intent', self.handle_register_intent)
-        self.bus.on('delete_intent', self.handle_delete_intent)
-        self.bus.on('system', self.handle_system_message)
-        self.bus.on('raw', self.handle_raw)
-        """
-
         self.bus.on(MSG_REGISTER_INTENT, self.handle_register_intent)
         self.bus.on(MSG_DELETE_INTENT, self.handle_delete_intent)
         self.bus.on(MSG_DELETE_SKILL_INTENTS, self.handle_delete_skill_intents)
         self.bus.on(MSG_SYSTEM, self.handle_system_message)
         self.bus.on(MSG_RAW, self.handle_raw)
-
 
     def handle_system_message(self, message):
         # we try to stay in-sync with the system skill regarding OOBs
@@ -197,7 +189,6 @@ class UttProc:
         data = msg.data
 
         key = self.key_from_data(data)
-        self.log.error("INTENT: Trying to register key is %s" % (key,))
 
         if key in self.intents:
             self.log.warning("Intent clash! key=%s, skill_id=%s ignored!" % (key,data['skill_id']))
