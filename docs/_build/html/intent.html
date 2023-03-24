@@ -94,6 +94,156 @@ is sent to the associated endpoint.</p>
 <p>It should be noted the intent service is a first come first serve service and it will reject
 duplicate intent (also known as <strong>intent clash</strong>) registration requests.</p>
 </section>
+<section id="shallow-parsing">
+<h2>Shallow Parsing<a class="headerlink" href="#shallow-parsing" title="Permalink to this heading">¶</a></h2>
+<p>Extract information from utterances using shallow parsing.
+This approach takes a sample sentence set and creates a
+set of grammatical rules from them along with skeleton
+methods and associated “rule to method” mapping dictionary.</p>
+<section id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Manually create sample sentences in file “sentences.txt” (or any file name you prefer).</p></li>
+<li><p>Run cmu_parse.py sentences_filename.txt which will convert input file to “cmu_trees.txt”</p></li>
+<li><p>Run produce_rules.py which creates a “grammar to method” map in file named “generated_parse_handlers.py”.</p></li>
+<li><p>Manually fill in the empty methods in file “generated_parse_handlers.py”. This file was created by step (3). When done rename this to command_rule_handlers.py or question_rule_handlers.py accordingly.</p></li>
+<li><p>In your code include parse_sentence from the file named “parse_sentence.py”</p></li>
+</ol>
+<dl>
+<dt>Example:</dt><dd><p>from parse_sentence import parse_sentence</p>
+<p>info = parse_sentence(“turn off the kitchen light”)</p>
+</dd>
+</dl>
+<p>Note the file ‘generated_file_handlers.py’ is created by the produce_rules.py script.
+The file user_generated_handlers.py are the actual handlers which are created by the user.
+In this case they are the default handlers provided by the system. You can use them or
+replace them with your own if you prefer or add to them.</p>
+</section>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h3>
+<p>Shallow parsing is based on the concept that for our simple use-case we can
+divide sentences into one of three categories; question, command or information.</p>
+<p>If we take the command category only we can then break each sentence down into its
+grammatical structure (a parse tree) and then flatten it into a grammatical rule.</p>
+<p>This grammatical rule is known as a semi lexical structure (SLS) because it is
+devoid of its depth, however, it still contains some essence of the original
+lexical structure.</p>
+<p>We then use this rule to invoke a specific method designed to handle just
+sentences of this grammatical structure.</p>
+<p>The system may be considered <em>consistent</em> and  <em>complete</em> if only
+recognized <em>shallow patterns</em> are provided as input. For simple command and
+query domains like a voice assistant there are typically less than 100-200 such
+unique patterns (there are only so many ways to say ‘turn on the light’)
+and so the entire set may enumerated. For larger domains the system can
+recognize a new unrecognized pattern and learn it in real-time given a proper
+feedback mechanism.</p>
+<p>Alternatively, the unrecognized utterance may be added to the training set and
+the new <em>mini parser</em> may be manually added.</p>
+<p>The complete process looks like this …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>STEP1<span class="o">)</span><span class="w"> </span>sentence<span class="w"> </span>---&gt;<span class="w"> </span>parse<span class="w"> </span>tree
+STEP2<span class="o">)</span><span class="w"> </span>parse<span class="w"> </span>tree<span class="w"> </span>---&gt;<span class="w"> </span>grammar<span class="w"> </span>rule
+STEP3<span class="o">)</span><span class="w"> </span>grammar<span class="w"> </span>rule<span class="w"> </span>---&gt;<span class="w"> </span>grammar<span class="w"> </span>rule<span class="w"> </span>handler
+</pre></div>
+</div>
+</section>
+<section id="for-example">
+<h3>For example …<a class="headerlink" href="#for-example" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>STEP1<span class="o">)</span><span class="w"> </span>sentence<span class="w"> </span>---&gt;<span class="w"> </span>parse<span class="w"> </span>tree
+close<span class="w"> </span>the<span class="w"> </span>living<span class="w"> </span>room<span class="w"> </span>window
+<span class="o">(</span>VP<span class="w"> </span>close<span class="w"> </span><span class="o">(</span>NP<span class="w"> </span>the<span class="w"> </span>living<span class="w"> </span>room<span class="w"> </span>window<span class="o">))</span>
+
+STEP2<span class="o">)</span><span class="w"> </span>parse<span class="w"> </span>tree<span class="w"> </span>---&gt;<span class="w"> </span>grammar<span class="w"> </span>rule
+<span class="o">(</span>VP<span class="w"> </span>close<span class="w"> </span><span class="o">(</span>NP<span class="w"> </span>the<span class="w"> </span>living<span class="w"> </span>room<span class="w"> </span>window<span class="o">))</span>
+VP<span class="w"> </span>NP
+
+STEP3<span class="o">)</span><span class="w"> </span>grammar<span class="w"> </span>rule<span class="w"> </span>---&gt;<span class="w"> </span>grammar<span class="w"> </span>rule<span class="w"> </span>handler
+VP<span class="w"> </span>NP
+<span class="nv">resp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>rule_map<span class="o">[</span><span class="s1">&#39;VP_NP&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+<p>This will determine the sentence structure
+then invoke the proper handler based on
+the derived grammar rule. It is a very simple
+pattern matching approach.</p>
+<p>This is used only for imperatives and the skeleton is
+generated but then modified manually ultimately producing
+the command_rule_handlers.py file which is the actual code
+that handles each unique command rule structure. this file
+also includes the dictionary which is used as a branch
+table for the various handlers.</p>
+<p>If you run into command sentences that are not recognized
+you can create the rule manually and then add your handler
+to this file or you can create a text file of example command
+sentences and run cmu_parse.py against them which will produce
+a file named cmu_trees.txt which can then be fed into the file
+named produce_rules.py which will convert them into an execuatble
+python file named generated_rule_handlers.py. this is a raw
+initial rule handler file which you can modify accordingly.
+Typically you will sumply add your new rule handlers to this
+file and keep the existing code.</p>
+<p>The actual rule maps look like this …</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>def<span class="w"> </span>VP_NP_PP_NP_NP_NP_VP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np_np_np_vp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_PP_NP_PP_NP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_pp_np_pp_np_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PP_NP_NP_NP_VP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np_np_np_vp<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PRT_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_prt_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_PRT_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_prt_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PP_NP_ADJP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np_adjp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_NP_PP_NP_PRT<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_np_pp_np_prt<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PP_NP_NP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span><span class="o">{</span><span class="s1">&#39;error&#39;</span>:<span class="s1">&#39;unimplemented = VP_NP_PP_NP_NP_NP&#39;</span><span class="o">}</span>
+def<span class="w"> </span>VP_PP_NP_NP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span><span class="o">{</span><span class="s1">&#39;error&#39;</span>:<span class="s1">&#39;unimplemented = VP_PP_NP_NP_PP_NP&#39;</span><span class="o">}</span>
+def<span class="w"> </span>VP_NP_NP_VP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span><span class="o">{</span><span class="s1">&#39;error&#39;</span>:<span class="s1">&#39;unimplemented = VP_NP_NP_VP_PP_NP&#39;</span><span class="o">}</span>
+def<span class="w"> </span>VP_NP_PP_NP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PP_NP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_PP_NP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_pp_np_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_VP_VP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span><span class="o">{</span><span class="s1">&#39;error&#39;</span>:<span class="s1">&#39;unimplemented = VP_NP_VP_VP_NP&#39;</span><span class="o">}</span>
+def<span class="w"> </span>VP_NP_ADVP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_advp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_PP_NP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_pp_np_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP_PRT<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np_prt<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_PP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_pp_np<span class="o">(</span>sentence<span class="o">)</span>
+def<span class="w"> </span>VP_NP<span class="o">(</span>sentence<span class="o">)</span>:return<span class="w"> </span>vp_np<span class="o">(</span>sentence<span class="o">)</span>
+
+<span class="nv">rule_map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP NP NP VP NP&#39;</span>:VP_NP_PP_NP_NP_NP_VP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP NP PP NP&#39;</span>:VP_NP_PP_NP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP PP NP PP NP PP NP&#39;</span>:VP_PP_NP_PP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP NP NP VP&#39;</span>:VP_NP_PP_NP_NP_NP_VP,
+<span class="w">  </span><span class="s1">&#39;VP NP NP PP NP PRT&#39;</span>:VP_NP_NP_PP_NP_PRT,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP ADJP NP&#39;</span>:VP_NP_PP_NP_ADJP_NP,
+<span class="w">  </span><span class="s1">&#39;NP VP PP NP PP NP&#39;</span>:NP_VP_PP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP NP NP&#39;</span>:VP_NP_PP_NP_NP_NP,
+<span class="w">  </span><span class="s1">&#39;VP PP NP NP PP NP&#39;</span>:VP_PP_NP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP NP VP PP NP&#39;</span>:VP_NP_NP_VP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP PP NP&#39;</span>:VP_NP_PP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP NP&#39;</span>:VP_NP_PP_NP_NP,
+<span class="w">  </span><span class="s1">&#39;VP PP NP PP NP&#39;</span>:VP_PP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PRT PP NP&#39;</span>:VP_NP_PRT_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP VP VP NP&#39;</span>:VP_NP_VP_VP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP ADVP NP&#39;</span>:VP_NP_ADVP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PP NP&#39;</span>:VP_NP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP  PP NP NP&#39;</span>:VP_PP_NP_NP,
+<span class="w">  </span><span class="s1">&#39;NP VP NP PRT&#39;</span>:NP_VP_NP_PRT,
+<span class="w">  </span><span class="s1">&#39;NP VP PP NP&#39;</span>:NP_VP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP PRT&#39;</span>:VP_NP_PRT,
+<span class="w">  </span><span class="s1">&#39;VP PP NP&#39;</span>:VP_PP_NP,
+<span class="w">  </span><span class="s1">&#39;NP VP NP&#39;</span>:NP_VP_NP,
+<span class="w">  </span><span class="s1">&#39;VP PRT NP&#39;</span>:VP_PRT_NP,
+<span class="w">  </span><span class="s1">&#39;VP NP&#39;</span>:VP_NP,
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The methods are small parsers. Here is the handler for the shallow token pattern “VP PRT NP”.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="k">def</span> <span class="nf">vp_prt_np</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="linenos">2</span>   <span class="c1">#(VP turn (PRT up) (NP the heat))</span>
+<span class="linenos">3</span>   <span class="n">verb</span> <span class="o">=</span> <span class="n">get_tag_value</span><span class="p">(</span><span class="n">VP_TAG</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+<span class="linenos">4</span>   <span class="n">value</span> <span class="o">=</span> <span class="n">get_tag_value</span><span class="p">(</span><span class="n">PRT_TAG</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+<span class="linenos">5</span>   <span class="n">subject</span> <span class="o">=</span> <span class="n">get_tag_value</span><span class="p">(</span><span class="n">NP_TAG</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+<span class="linenos">6</span>   <span class="n">subject_pp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos">7</span>   <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;verb&#39;</span><span class="p">:</span><span class="n">verb</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">:</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;squal&#39;</span><span class="p">:</span><span class="n">subject_pp</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 
 
@@ -121,6 +271,12 @@ duplicate intent (also known as <strong>intent clash</strong>) registration requ
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Intent Processing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#intents">Intents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#shallow-parsing">Shallow Parsing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#for-example">For example …</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">System Configuration</a></li>
