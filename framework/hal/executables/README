@@ -4,11 +4,24 @@ The system volume skill needs to know how to set and get the mic and volume leve
 
 These files provide that capability. 
 
-Note only the linux.py file is working. the other 2 are left for informational purposes only.
+Note only the linux.py file is working. the other 2 are left for historical purposes only.
 To add a new platform copy and modify the linux.py file then manually add it as an option in the
 volume skill constructor (the only place it is currently used) and edit the yava.yml file to
 use your new value (like 'l', 'u', 'p', etc.)
 
+This is the current code from the volume skill which shows what it actually does.
+
+# workaround until we fix the config file to hold the actual module name
+cfg_platform = cfg.get_cfg_val('Advanced.Platform')
+
+if cfg_platform == 'u':
+    from framework.hal.executables.ubuntu import Platform
+elif cfg_platform == 'p':
+    from framework.hal.executables.pios import Platform
+elif cfg_platform == 'l':
+    from framework.hal.executables.linux import Platform
+
+self.hal = Platform(master_control_name, input_device_name, input_level_control_name, output_device_name, output_level_control_name)
 
 
 

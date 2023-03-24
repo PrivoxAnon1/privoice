@@ -9,6 +9,7 @@ from framework.message_types import (
         MSG_UTTERANCE, 
         MSG_SPEAK, 
         MSG_REGISTER_INTENT, 
+        MSG_DELETE_INTENT, 
         MSG_MEDIA,
         MSG_SYSTEM,
         MSG_RAW,
@@ -421,6 +422,36 @@ class PriVoice:
             ctr -= 1
 
         return self.sync_speak_done
+
+
+    def delete_intents(self, intent_type, verb, subject, callback):
+        # bind a sentence type, subject and verb to a callback
+        # sends on the message bus to the intent service.
+
+        subjects = subject
+        verbs = verb
+        if type(subject) is not list:
+            subjects = [subject]
+
+        if type(verb) is not list:
+            verbs = [verb]
+
+        for subject in subjects:
+            for verb in verbs:
+                key = intent_type + ':' + subject + ':' + verb
+
+                if key not in self.intents:
+                    self.log.warning("** %s ** [%s]error - delete key %s not found" % (self.skill_control.skill_id, self.skill_control.skill_id, key))
+                else:
+                    del self.intents[key]
+
+                    info = {
+                        'intent_type': intent_type,
+                        'subject': subject,
+                        'verb': verb,
+                        'skill_id':self.skill_control.skill_id
+                    }
+                    self.bus.send(MSG_DELETE_INTENT, 'intent_service', info)
 
 
     def register_intent(self, intent_type, verb, subject, callback):

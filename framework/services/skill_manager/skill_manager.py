@@ -10,6 +10,7 @@ from framework.message_types import (
         MSG_UTTERANCE,
         MSG_SPEAK,
         MSG_REGISTER_INTENT,
+        MSG_DELETE_SKILL_INTENTS,
         MSG_MEDIA,
         MSG_SYSTEM,
         MSG_RAW,
@@ -19,12 +20,14 @@ MY_BASE_DIR = os.getcwd()
 SYS_BASE_DIR = os.getenv('PVX_BASE_DIR')
 cancel_words = ['stop', 'forget it', 'cancel', 'quit', 'never mind', 'terminate']
 
-"""a skill repo is a repository which contains one or more skills
+"""a skill repo is a repository which contains one or more skills.
  skills are identified by the directory name with the first 
  9 characters being 'privoice_' so in the root of the repo, 
  any directories beginning with 'privoice_' are assumed to be
  privoice skills. if there is a skill.json file in this directory
- as well as an __init__.py file then the skill will be recognized"""
+ as well as an __init__.py file then the skill will be recognized 
+ and the system will attempt to start it on during the initialization
+ process."""
 
 def get_skill_repos():
     fh = open(os.getcwd() + "/framework/services/skill_manager/" + "repositories.json")
@@ -45,6 +48,18 @@ def get_pid(skill_identifier):
             return line[1]
     return 0
 
+def is_skill_running(skill_id):
+    output = os.popen("ps auxww | grep privoice").read()
+    output = output.split("\n")
+    for line in output:
+        line = line.split("/")
+        line = line[ len(line) - 1 ]
+        line = line.strip()
+        if line and len(line) > 0:
+            if line.find(skill_id) > -1:
+                return True
+    return False
+
 class SkillManager(PriVoice):
     def __init__(self, bus=None, timeout=5):
         self.skill_id = 'skill_manager'
@@ -53,14 +68,17 @@ class SkillManager(PriVoice):
         self.state = 'Idle'
         self.last_op = ''
 
-        ## TODO convert to two method calls, get repos and register intents
+        self.available_skills = []
+        self.already_installed = []
+
         self.get_skills_from_repos()
         self.register_intents()
-
+        print("AVAILABLE", self.available_skills)
+        print("INSTALLED", self.already_installed)
 
     def register_intents(self):
         ## register intents ##
-        # register subject is skill
+        # register subject is skills
         for verb in ['list', 'show', 'display']:
             self.register_intent('C', verb, 'skills', self.handle_list_skills)
 
@@ -84,44 +102,43 @@ class SkillManager(PriVoice):
         for verb in ['add', 'install', 'download', 'create']:
             self.register_intent('C', verb, 'skill', self.handle_install_skill)
 
-        # register delete skill
-        for verb in ['delete', 'remove', 'terminate', 'uninstall', 'cancel', 'kill', 'unload']:
+        # register generic delete skill
+        for verb in ['delete', 'remove', 'uninstall', 'unload']:
             self.register_intent('C', verb, 'skill', self.handle_delete_skill)
 
-        # add custom intents based on available skills
+        # add custom install intents based on available skills
         for skill_id in self.available_skills:
             skill = self.get_skill_for_id(skill_id)
             for verb in ['add', 'install', 'download', 'create']:
                 self.register_intent('C', verb, skill.name, self.handle_install_skill)
 
-        # add custom intents based on available skills
-        for skill_id in self.available_skills:
-            skill = self.get_skill_for_id(skill_id)
-            for verb in ['delete', 'remove', 'terminate', 'cancel', 'kill', 'unload']:
-                self.register_intent('C', verb, skill.name, self.handle_install_skill)
+        # add remove/delete intents for installed skills
+        for entry in self.already_installed:
+            for verb in ['delete', 'remove', 'uninstall', 'unload']:
+                self.register_intent('C', verb, entry, self.handle_delete_skill)
+                self.register_intent('C', verb, entry + ' skill', self.handle_delete_skill)
 
         # start/run/restart skill name
-        for skill_id in self.available_skills:
-            skill = self.get_skill_for_id(skill_id)
+        for skill_id in self.already_installed:
             for verb in ['start', 'restart', 'run', 'execute']:
-                self.register_intent('C', verb, skill.name, self.handle_start_skill)
+                self.register_intent('C', verb, skill_id, self.handle_start_skill)
+                self.register_intent('C', verb, skill_id + ' skill', self.handle_start_skill)
 
-        # stop/etc 
+        # generic stop, subject = skill
         for verb in ['stop', 'cancel', 'terminate', 'shut down', 'halt', 'kill']:
             self.register_intent('C', verb, 'skill', self.handle_stop_skill)
 
-        # start/run/restart skill name
-        for skill_id in self.available_skills:
-            skill = self.get_skill_for_id(skill_id)
+        # stop skill name
+        for skill_id in self.already_installed:
             for verb in ['stop', 'cancel', 'terminate', 'shut down', 'halt', 'kill']:
-                self.register_intent('C', verb, skill.name, self.handle_stop_skill)
+                self.register_intent('C', verb, skill_id, self.handle_stop_skill)
+                self.register_intent('C', verb, skill_id + ' skill', self.handle_stop_skill)
 
         self.register_intent('C', 'help', 'skill', self.help)
         self.register_intent('C', 'help', 'skills', self.help)
         self.register_intent('C', 'help', 'skill manager', self.help)
         self.register_intent('C', 'skill', 'help', self.help)
         self.register_intent('C', 'skills', 'help', self.help)
-
 
     def get_skill_for_id(self, skill_id):
         for skill in self.all_skills:
@@ -138,40 +155,49 @@ class SkillManager(PriVoice):
         """
 
     def start_skill(self, skill_id):
-        print("XXXXXXXXXXXXXXXXxxx do nothing start skill hit !!!!!!!!!!!!!!!!!")
-        self.speak("Incomplete! start skill not working yet!")
+        if is_skill_running(skill_id):
+            self.speak("The %s skill is already running." % (skill_id,))
+            return False
+        print("START SKILL dir = skills/user_skills/privoice_%s/" % (skill_id,))
+        cmd = "%s/scripts/run_skill.sh skills/user_skills/privoice_%s" % (SYS_BASE_DIR, skill_id)
+        os.system(cmd)
+        self.speak("The %s skill has been started." % (skill_id,))
+        return True
 
     def uninstall_skill(self, skill_id):
-        print("XXXXXXXXXXXXXXXXxxx do nothing remove skill hit !!!!!!!!!!!!!!!!!")
-        self.speak("Incomplete! uninstall not working yet!")
+        self.stop_skill(skill_id)
+        cmd = "rm -Rf skills_user_skills/privoice_%s" % (skill_id,)
+        os.system(cmd)
+        self.speak("The %s skill has been removed." % (skill_id,))
 
+    def delete_skill_intents(self, skill_id):
+        # tell intent svc to delete all skills associated with this skill id
+        info = {'skill_id':skill_id}
+        self.bus.send(MSG_DELETE_SKILL_INTENTS, 'intent_service', info)
 
     def stop_skill(self, skill_id):
-        print("XXXXXXXXXXXXXXXXxxx stop skill hit !!!!!!!!!!!!!!!!!")
+        # delete skill's intents and kill it
+        self.delete_skill_intents(skill_id)
         pid = get_pid(skill_id)
         if pid and pid!= '' or pid != '0':
             cmd = "kill %s" % (pid,)
             os.system(cmd)
 
     def install_skill(self, skill_id):
-        print("XXXXXXXXXXXXXXXXxxx install skill hit !!!!!!!!!!!!!!!!!")
         will_speak = "Installing the " + skill_id
         self.speak(will_speak)
         for skill in self.all_skills:
             if skill.name == skill_id:
-                print("Found skill and would have installed it ")
                 skill_dir_name = skill.base_dir.split("/")
                 skill_dir_name = skill_dir_name[len(skill_dir_name)-1]
                 dest_dir = SYS_BASE_DIR + "/skills/user_skills/" + skill_dir_name 
                 cmd = "%s/scripts/install_skill.sh %s %s" % (SYS_BASE_DIR, skill.base_dir, dest_dir)
-                print("Found skill!, src=%s, dest=%s, cmd=%s" % (skill.base_dir, dest_dir, cmd))
                 os.system(cmd)
-                will_speak = skill_id + " Installation complete."
+                will_speak = skill_id + " Installation complete. You must start it manually or it will be started automatically on the next boot."
+                # TODO ask if they would like us to start it here
                 self.speak(will_speak)
 
-
     def handle_user_which_skill_response(self, user_input):
-        print("user response to which skill is %s" % (user_input,))
         user_input = user_input.lower()
         if user_input in cancel_words:
             # user wants to bail
@@ -197,8 +223,6 @@ class SkillManager(PriVoice):
         self.speak("Sorry I can't find the %s skill." % (user_input,))
 
     def handle_stop_skill(self, msg):
-        print(msg)
-        print(msg['data'])
         sentence_info = msg['data']['utt']
         sentence_info = msg['data']['utt']
         subject = sentence_info['subject']
@@ -212,21 +236,19 @@ class SkillManager(PriVoice):
             self.get_user_input(self.handle_user_which_skill_response, prompt, self.handle_timeout)
 
     def handle_start_skill(self, msg):
-        print(msg)
-        print(msg['data'])
         sentence_info = msg['data']['utt']
         sentence_info = msg['data']['utt']
         subject = sentence_info['subject']
         if subject and subject != '' and subject != 'skill':
-            print("XXXXXXXXXXXX run skill %s" % (subject,))
+            subject = subject.replace(" skill","").strip()
             self.start_skill(subject)
-            #self.handle_user_which_skill_response(subject)
         else:
             self.last_op = 'start'
             prompt = "Start which skill?"
             self.get_user_input(self.handle_user_which_skill_response, prompt, self.handle_timeout)
 
     def handle_list_skills(self, msg):
+        """list skills as opposed to list installed or list active"""
         say = ""
         if len(self.available_skills) > 0:
             say = "The following skills are available to be installed."
@@ -246,35 +268,44 @@ class SkillManager(PriVoice):
 
     def handle_list_installed_skills(self, msg):
         print(self.already_installed)
-        say = ''
-        for skill in self.already_installed:
-            skill_name = skill
-            say += "the %s skill" % (skill_name,)
+        say = "The following %s skills are installed." % (len(self.already_installed,))
+        if len(self.already_installed) > 0:
+            for skill in self.already_installed:
+                skill_name = skill
+                say += " The %s skill." % (skill_name,)
+        else:
+            say = 'There are no skills currently installed'
         self.speak(say)
 
     def handle_list_available_skills(self, msg):
         print(self.available_skills)
-        say = ''
-        for skill in self.available_skills:
-            say += "the %s skill" % (skill,)
+        say = 'The following skills are available to be installed.'
+        if len(self.available_skills) > 0:
+            for skill in self.available_skills:
+                say += " The %s skill." % (skill,)
+        else:
+            say = 'There are no skills available to be installed.'
         self.speak(say)
 
     def handle_list_active_skills(self, msg):
         output = os.popen("ps auxww | grep privoice").read()
         output = output.split("\n")
         say = 'The following skills are currently running.'
+        at_least_one = False
         for line in output:
             line = line.split("/")
             line = line[ len(line) - 1 ]
             line = line.strip()
             if line and len(line) > 0: 
                 line = line[9:]
-                print("XXXXXXXXXXXXXXXXXXXXX %s" % (line,))
                 tmp = "The %s skill." % (line,)
                 say += tmp
+                at_least_one = True
 
-        self.speak(say)
-
+        if at_least_one:
+            self.speak(say)
+        else:
+            self.speak('There are no skills currently running. This is quite odd.')
 
     def handle_install_skill(self, msg):
         print(msg)
@@ -292,7 +323,6 @@ class SkillManager(PriVoice):
         # TODO delete is a stop fillowed by an rm
         self.uninstall_skill(msg)
 
-
     def get_skills_from_repos(self):
         skill_repos = get_skill_repos()
 
@@ -301,8 +331,6 @@ class SkillManager(PriVoice):
         os.system("rm -Rf *")
 
         # build directory of skills 
-        self.available_skills = []
-        self.already_installed = []
         directory = '.'
         self.all_skills = []
         skill_ids = []
@@ -375,7 +403,6 @@ class SkillManager(PriVoice):
             print("Found %s skills in this repo" % (repo_skill_ctr,))
 
         os.chdir(MY_BASE_DIR)
-        #print("Ended up in %s" % (os.getcwd(),))
 
         # at this point, all_skills[] array holds all known skills
         # from all known repositories. Now determine any user skills
@@ -408,15 +435,14 @@ class SkillManager(PriVoice):
         while True:
             #print("tic")
             time.sleep(10)
+            pass
 
     def help(self, msg):
         say = """The skill manager is used to install and remove skills.
         Basic commands are install skill, remove skill and show skills.
-        You may also start and stop skills.
-        For example, stop the weather skill.
-        Or, show active skills."""
+        You may also start and stop skills. For example, stop the weather
+        skill Or, show active skills."""
         self.speak(say)
-
 
 if __name__ == '__main__':
     sm = SkillManager()

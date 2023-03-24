@@ -10,11 +10,14 @@ from framework.message_types import (
         MSG_UTTERANCE, 
         MSG_MEDIA, 
         MSG_RAW, 
+        MSG_REGISTER_INTENT,
+        MSG_DELETE_INTENT,
+        MSG_DELETE_SKILL_INTENTS,
         MSG_SYSTEM
         )
 
 class UttProc:
-    # English language specific intent parser. 
+    # English language specific utterance to intent parser. 
     def __init__(self, bus=None, timeout=5):
         self.skill_id = 'intent_service'
 
@@ -56,9 +59,18 @@ class UttProc:
         self.stop_aliases = ['stop', 'terminate', 'abort', 'cancel', 'kill', 'exit']
 
         # register message handlers
+        """
         self.bus.on('register_intent', self.handle_register_intent)
+        self.bus.on('delete_intent', self.handle_delete_intent)
         self.bus.on('system', self.handle_system_message)
         self.bus.on('raw', self.handle_raw)
+        """
+
+        self.bus.on(MSG_REGISTER_INTENT, self.handle_register_intent)
+        self.bus.on(MSG_DELETE_INTENT, self.handle_delete_intent)
+        self.bus.on(MSG_DELETE_SKILL_INTENTS, self.handle_delete_skill_intents)
+        self.bus.on(MSG_SYSTEM, self.handle_system_message)
+        self.bus.on(MSG_RAW, self.handle_raw)
 
 
     def handle_system_message(self, message):
@@ -154,18 +166,38 @@ class UttProc:
         # no match 
         return skill_id, ''
 
-
-    def handle_register_intent(self, msg):
-        data = msg.data
-
+    def key_from_data(self, data):
         # the subject may contain colons which is 
         # what we prefer to use as a delimiter
         # so we convert them here
         subject = data['subject'].replace(":", ";")
+        return data['intent_type'] + ':' + subject.lower() + ':' + data['verb']
 
-        key = data['intent_type'] + ':' + subject.lower() + ':' + data['verb']
 
-        self.log.error("INTENT. Trying to register key is %s" % (key,))
+    def handle_delete_skill_intents(self, msg):
+        data = msg.data
+        skill_id = data['skill_id']
+        for intent in self.intents:
+            if self.intents[intent]['skill_id'] == skill_id:
+                print("DELETE INTENT %s" % (intent,))
+                del self.intents[intent]
+
+
+    def handle_delete_intent(self, msg):
+        data = msg.data
+        key = self.key_from_data(data)
+        if self.intents[key]:
+            del self.intents[key]
+            self.log.info("INTENT. %s has been deleted!" % (key,))
+        else:
+            self.log.warning("INTENT. Trying to delete non-existent key = %s" % (key,))
+
+
+    def handle_register_intent(self, msg):
+        data = msg.data
+
+        key = self.key_from_data(data)
+        self.log.error("INTENT: Trying to register key is %s" % (key,))
 
         if key in self.intents:
             self.log.warning("Intent clash! key=%s, skill_id=%s ignored!" % (key,data['skill_id']))
@@ -185,7 +217,7 @@ class UttProc:
         contents = utt
         si = SentenceInfo(self.base_dir)
         res = self.interpreter.event_from_utt(utt)
-        self.log.debug("Intent processor handle raw - result: %s" % (res,))
+        self.log.info("Intent processor handle raw - result: %s" % (res,))
 
         if res == 'U_OOB' or res == 'Q_OOB':
             #contents = '[OOB]' + utt

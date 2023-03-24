@@ -100,13 +100,18 @@ class Interpret:
 
     def is_oob(self, utt):
         # return '' if not, else the oob
+        # TODO support multi word OOBs
         utt = self.clean_utt(utt)
+        num_words = len(utt.split(" "))
         utt = utt.split(" ")[0].lower()
         try:
             indx = oobs.index(utt)
-            return oobs[indx]
+            if num_words == 1:
+                return oobs[indx]
         except:
-            return ''
+            pass
+
+        return ''
 
     def event_from_utt(self, utt):
         self.shared_data['ctr'] = self.watchdog_timeout

@@ -36,6 +36,8 @@ MSG_SPEAK = 'speak'
 
 # register_intent() only
 MSG_REGISTER_INTENT = 'register_intent'
+MSG_DELETE_INTENT = 'delete_intent'
+MSG_DELETE_SKILL_INTENTS = 'delete_skill_intents'
 
 # someday this could be used for validation
 MSG_TYPES = [
@@ -47,6 +49,8 @@ MSG_TYPES = [
         MSG_SYSTEM,
         MSG_STOP,
         MSG_SPEAK,
+        MSG_DELETE_INTENT,
+        MSG_DELETE_SKILL_INTENTS,
         MSG_REGISTER_INTENT
         ]
 
