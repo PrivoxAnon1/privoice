@@ -69,7 +69,7 @@ mkdir<span class="w"> </span>privoice_hello
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Finally, create a file named init.py and put this in it …</p>
+<p>Next, create a file named init.py and put this in it …</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">skills.pvx_base</span> <span class="kn">import</span> <span class="n">PriVoice</span>
 <span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="linenos"> 3</span>
@@ -204,26 +204,34 @@ It is located in framework/services/skill_mamager/repositories.json.</p>
 </section>
 <section id="skill-intents">
 <h3>Skill Intents<a class="headerlink" href="#skill-intents" title="Permalink to this heading">¶</a></h3>
-<p>An intent is the matching of an endpoint (a method in the skill) with a sentence type, subject and a verb.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;turn&#39;</span><span class="p">,</span> <span class="s1">&#39;light&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_light</span><span class="p">)</span>
+<p>An intent is the matching of an endpoint (a method in the skill) with a sentence type, sentence subject and a sentence verb.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;turn&#39;</span><span class="p">,</span> <span class="s1">&#39;light&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_light</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>In the above example the method handle_change_light will be called when the user speaks ‘turn on the light’ or ‘turn off the light’.</p>
+<p>Which says call my method named <em>handle_change_light</em> when the sentence subject is <em>light</em> and the sentence verb is <em>turn</em>.</p>
 </section>
-<section id="implicit-ailiasing">
-<h3>Implicit Ailiasing<a class="headerlink" href="#implicit-ailiasing" title="Permalink to this heading">¶</a></h3>
-<p>It is often convenient to alias both the subject and verb. For example, regardless of whether the user says ‘shut the light’ or ‘turn off the light’ or ‘set the light on’ in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This may be considered aliasing the verb alter where alter could be one of (change, turn, modify, set). We can call this verb aliasing.</p>
+<section id="ailiasing">
+<h3>Ailiasing<a class="headerlink" href="#ailiasing" title="Permalink to this heading">¶</a></h3>
+<p>In many cases, the utterances</p>
+<ul class="simple">
+<li><p>Turn off the light</p></li>
+<li><p>Turn the light off</p></li>
+<li><p>Shut off the light</p></li>
+<li><p>Change the light to off</p></li>
+<li><p>Set the light off</p></li>
+</ul>
+<p>Could all call the same method. This method could be called the <strong>alter</strong> method where the action <em>alter</em> can be used as an alias for the above verbs ‘Turn’, ‘Shut’, ‘Change’ and ‘Set’.</p>
+<p>It is often convenient to alias both the subject and verb. For example, regardless of whether the user says ‘shut the light’ or ‘turn off the light’ or ‘set the light on’ in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This compressing of multiple aliases into a single endpoint is known as <em>implicit aliasing</em> as opposed to <em>explicit aliasing</em> which is simply the mapping of multiple verbs (or subjects) to a single root verb (or subject).</p>
 <p>This code snippet from the volume skill demonstrates implicit aliasing of both a set of nouns and a set of verbs.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="n">commands</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">]</span>
-<span class="linenos">2</span> <span class="n">subjects</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;microphone&#39;</span><span class="p">,</span> <span class="s1">&#39;mic&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">]</span>
-<span class="linenos">3</span>
-<span class="linenos">4</span> <span class="c1"># input volume</span>
-<span class="linenos">5</span> <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
-<span class="linenos">6</span>     <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
-<span class="linenos">7</span>         <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_mic</span><span class="p">)</span>
-<span class="linenos">8</span>         <span class="n">inactive_state_intents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s1">&#39;C&#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">subject</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">command</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">verbs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">]</span>
+<span class="n">subjects</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;microphone&#39;</span><span class="p">,</span> <span class="s1">&#39;mic&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">verbs</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_mic</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Any combination of subject and verb will ultimately lead to the <em>handle_change_mic</em> method being called.</p>
 </section>
 </section>
 <section id="skill-operation">
@@ -282,8 +290,8 @@ contains information related to the actual sentence spoken by the user.</p>
 </section>
 <section id="skill-api">
 <h2>Skill API<a class="headerlink" href="#skill-api" title="Permalink to this heading">¶</a></h2>
-<p>The example skill located in the “skills/user_skills/privoice_example” directory is a good example
-of how a basic skill can communicate with the user. The time and date (“skills/user_skills/privoice_timedate”) skill
+<p>The example skill located in the <em>skills/user_skills/privoice_example</em> directory is a good example
+of how a basic skill can communicate with the user. The time and date (<em>skills/user_skills/privoice_timedate</em>) skill
 is an example of a minimalistic user skill. These are good skills to use as a template for
 creating a new skill.</p>
 <p>All skills that inherit from the PriVoice class have the following built-in methods available to them.</p>
@@ -542,7 +550,7 @@ def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </
 <li class="toctree-l3"><a class="reference internal" href="#hello-world">Hello World</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-local-repository">Creating a Local Repository</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skill-intents">Skill Intents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implicit-ailiasing">Implicit Ailiasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ailiasing">Ailiasing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#skill-operation">Skill Operation</a></li>

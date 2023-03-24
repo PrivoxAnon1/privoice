@@ -25,7 +25,7 @@ Verify System
 =============
 Before getting started it is a good idea to make sure you have a properly
 configured system. PriVoice basically requires two standard linux commands;
-'aplay' and 'arecord' (ALSA play and ALSA record). To make sure everything
+*aplay* and *arecord* (ALSA play and ALSA record). To make sure everything
 is working correctly open a terminal and enter this command
 
 
@@ -47,7 +47,7 @@ below for more help with this.
 ==========
 Clone Repo
 ==========
-Assuming the commands 'arecord' and 'aplay' work as expected, you install the system as follows 
+Assuming the commands *arecord* and *aplay* work as expected, you install the system as follows 
 
 .. code-block:: bash
 
@@ -85,6 +85,46 @@ Once it has completed you should see something like this on your screen
    Receiving objects: 100% (27/27), 162.74 KiB | 1.37 MiB/s, done.
    Default skills installed
 
+===============
+Test and Adjust
+===============
+Once you have verified the installation completed successfully you should test
+the quality of your hardware. Run the following command from the base directory
+
+.. code-block:: bash
+
+   . ./scripts/init_env.sh
+
+Yes, that's **dot space dot slash**. Next run 
+
+.. code-block:: bash
+
+   ./framework/services/recognizer/recognizer.sh
+
+
+This will run the recognizer using the default system configuration values.
+You should see what you say printed on the screen. Your output should look
+similar to this
+
+.. code-block:: bash
+
+   Recording WAVE 'stdin' : Signed 16 bit Little Endian, Rate 16000 Hz, Mono
+   STT Transcriber is Running
+   BUS:Not Connected, MIN_WAV:9600 bytes, VAD:1, MODEL:small.en, RST:3.5 seconds
+   [58240][1.820000 secs]Took 1.303991 secs: Testing, one, two, three.
+   [25600][0.800000 secs]Took 0.200814 secs: Goodbye.
+
+Hit Ctl+C at any time to exit the program.
+
+The output shown above lists several important values. 
+
+First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
+
+From the output we can see that using the *small.en* model we are getting close to a 1:1 ratio of input time to transcribe time. 
+
+If we were to change the STT model in the **yava.yml** file to *tiny.en* and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the *tiny.en* model is below 1GB. 
+
+You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.
 
 ===================
 Installation Issues
@@ -431,47 +471,6 @@ Or if no card is required you can drop the "-c".
 Software Modules
 ----------------
 Typically issues arise from pinned version clash. If you are seeing a module build error you should create a new virtual environment and try to install it in isolation there first.
-
-===============
-Test and Adjust
-===============
-Once you have verified the installation completed successfully you should test
-the quality of your hardware. Run the following command from the base directory
-
-.. code-block:: bash
-
-   . ./scripts/init_env.sh
-
-Yes, that's **dot space dot slash**. Next run 
-
-.. code-block:: bash
-
-   ./framework/services/recognizer/recognizer.sh
-
-
-This will run the recognizer using the default system configuration values.
-You should see what you say printed on the screen. Your output should look
-similar to this
-
-.. code-block:: bash
-
-   Recording WAVE 'stdin' : Signed 16 bit Little Endian, Rate 16000 Hz, Mono
-   STT Transcriber is Running
-   BUS:Not Connected, MIN_WAV:9600 bytes, VAD:1, MODEL:small.en, RST:3.5 seconds
-   [58240][1.820000 secs]Took 1.303991 secs: Testing, one, two, three.
-   [25600][0.800000 secs]Took 0.200814 secs: Goodbye.
-
-Hit Ctl+C at any time to exit the program.
-
-The output shown above lists several important values. 
-
-First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string. 
-
-From the output we can see that using the *small.en* model we are getting close to a 1:1 ratio of input time to transcribe time. 
-
-If we were to change the STT model in the **yava.yml** file to *tiny.en* and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the *tiny.en* model is below 1GB. 
-
-You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.
 
 ==================
 Operational Issues

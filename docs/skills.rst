@@ -49,7 +49,7 @@ Create a file named skill.json. It should look like this ...
 	"search_terms":["hello", "hi"]
    }   
 
-Finally, create a file named init.py and put this in it ...
+Next, create a file named init.py and put this in it ...
 
 .. code-block:: python
    :linenos:
@@ -221,37 +221,46 @@ The next time you restart the system it will pick up your repo and you can use t
 -------------
 Skill Intents
 -------------
-An intent is the matching of an endpoint (a method in the skill) with a sentence type, subject and a verb. 
+An intent is the matching of an endpoint (a method in the skill) with a sentence type, sentence subject and a sentence verb. 
 
 
 .. code-block:: python
-   :linenos:
 
     self.register_intent('C', 'turn', 'light', self.handle_change_light)
 
 
-In the above example the method handle_change_light will be called when the user speaks 'turn on the light' or 'turn off the light'.
+Which says call my method named *handle_change_light* when the sentence subject is *light* and the sentence verb is *turn*. 
 
-------------------
-Implicit Ailiasing
-------------------
-It is often convenient to alias both the subject and verb. For example, regardless of whether the user says 'shut the light' or 'turn off the light' or 'set the light on' in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This may be considered aliasing the verb alter where alter could be one of (change, turn, modify, set). We can call this verb aliasing. 
+---------
+Ailiasing
+---------
+In many cases, the utterances 
+
++ Turn off the light
++ Turn the light off
++ Shut off the light 
++ Change the light to off
++ Set the light off
+
+Could all call the same method. This method could be called the **alter** method where the action *alter* can be used as an alias for the above verbs 'Turn', 'Shut', 'Change' and 'Set'. 
+
+
+It is often convenient to alias both the subject and verb. For example, regardless of whether the user says 'shut the light' or 'turn off the light' or 'set the light on' in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This compressing of multiple aliases into a single endpoint is known as *implicit aliasing* as opposed to *explicit aliasing* which is simply the mapping of multiple verbs (or subjects) to a single root verb (or subject). 
 
 This code snippet from the volume skill demonstrates implicit aliasing of both a set of nouns and a set of verbs.
 
 
 .. code-block:: python
-   :linenos:
 
-    commands = ['set', 'change', 'modify']
+    verbs = ['set', 'change', 'modify']
     subjects = ['microphone', 'mic', 'input']
 
-    # input volume
     for subject in subjects:
-        for command in commands:
+        for command in verbs:
             self.register_intent('C', command, subject, self.handle_change_mic)
-            inactive_state_intents.append( 'C' + ':' + subject + ':' + command )
 
+
+Any combination of subject and verb will ultimately lead to the *handle_change_mic* method being called.
 
 ===============
 Skill Operation
@@ -322,8 +331,8 @@ The skill does not need to do anything with the message. It is provided as input
 =========
 Skill API
 =========
-The example skill located in the "skills/user_skills/privoice_example" directory is a good example
-of how a basic skill can communicate with the user. The time and date ("skills/user_skills/privoice_timedate") skill
+The example skill located in the *skills/user_skills/privoice_example* directory is a good example
+of how a basic skill can communicate with the user. The time and date (*skills/user_skills/privoice_timedate*) skill
 is an example of a minimalistic user skill. These are good skills to use as a template for
 creating a new skill. 
 

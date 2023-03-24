@@ -51,7 +51,7 @@ commands leveraging the Privox Cloud based voice network.</p>
 <h2>Verify System<a class="headerlink" href="#verify-system" title="Permalink to this heading">¶</a></h2>
 <p>Before getting started it is a good idea to make sure you have a properly
 configured system. PriVoice basically requires two standard linux commands;
-‘aplay’ and ‘arecord’ (ALSA play and ALSA record). To make sure everything
+<em>aplay</em> and <em>arecord</em> (ALSA play and ALSA record). To make sure everything
 is working correctly open a terminal and enter this command</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>arecord<span class="w"> </span>-f<span class="w"> </span>s16_le<span class="w"> </span>-r<span class="w"> </span><span class="m">16000</span><span class="w"> </span>-c<span class="w"> </span><span class="m">2</span><span class="w"> </span>test.wav
 </pre></div>
@@ -66,7 +66,7 @@ below for more help with this.</p>
 </section>
 <section id="clone-repo">
 <h2>Clone Repo<a class="headerlink" href="#clone-repo" title="Permalink to this heading">¶</a></h2>
-<p>Assuming the commands ‘arecord’ and ‘aplay’ work as expected, you install the system as follows</p>
+<p>Assuming the commands <em>arecord</em> and <em>aplay</em> work as expected, you install the system as follows</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># checkout the repository</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/PrivoxAnon1/privoice.git
 
@@ -98,6 +98,34 @@ Receiving<span class="w"> </span>objects:<span class="w"> </span><span class="m"
 Default<span class="w"> </span>skills<span class="w"> </span>installed
 </pre></div>
 </div>
+</section>
+<section id="test-and-adjust">
+<h2>Test and Adjust<a class="headerlink" href="#test-and-adjust" title="Permalink to this heading">¶</a></h2>
+<p>Once you have verified the installation completed successfully you should test
+the quality of your hardware. Run the following command from the base directory</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.<span class="w"> </span>./scripts/init_env.sh
+</pre></div>
+</div>
+<p>Yes, that’s <strong>dot space dot slash</strong>. Next run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./framework/services/recognizer/recognizer.sh
+</pre></div>
+</div>
+<p>This will run the recognizer using the default system configuration values.
+You should see what you say printed on the screen. Your output should look
+similar to this</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Recording<span class="w"> </span>WAVE<span class="w"> </span><span class="s1">&#39;stdin&#39;</span><span class="w"> </span>:<span class="w"> </span>Signed<span class="w"> </span><span class="m">16</span><span class="w"> </span>bit<span class="w"> </span>Little<span class="w"> </span>Endian,<span class="w"> </span>Rate<span class="w"> </span><span class="m">16000</span><span class="w"> </span>Hz,<span class="w"> </span>Mono
+STT<span class="w"> </span>Transcriber<span class="w"> </span>is<span class="w"> </span>Running
+BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<span class="w"> </span>bytes,<span class="w"> </span>VAD:1,<span class="w"> </span>MODEL:small.en,<span class="w"> </span>RST:3.5<span class="w"> </span>seconds
+<span class="o">[</span><span class="m">58240</span><span class="o">][</span><span class="m">1</span>.820000<span class="w"> </span>secs<span class="o">]</span>Took<span class="w"> </span><span class="m">1</span>.303991<span class="w"> </span>secs:<span class="w"> </span>Testing,<span class="w"> </span>one,<span class="w"> </span>two,<span class="w"> </span>three.
+<span class="o">[</span><span class="m">25600</span><span class="o">][</span><span class="m">0</span>.800000<span class="w"> </span>secs<span class="o">]</span>Took<span class="w"> </span><span class="m">0</span>.200814<span class="w"> </span>secs:<span class="w"> </span>Goodbye.
+</pre></div>
+</div>
+<p>Hit Ctl+C at any time to exit the program.</p>
+<p>The output shown above lists several important values.</p>
+<p>First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string.</p>
+<p>From the output we can see that using the <em>small.en</em> model we are getting close to a 1:1 ratio of input time to transcribe time.</p>
+<p>If we were to change the STT model in the <strong>yava.yml</strong> file to <em>tiny.en</em> and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the <em>tiny.en</em> model is below 1GB.</p>
+<p>You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.</p>
 </section>
 <section id="installation-issues">
 <h2>Installation Issues<a class="headerlink" href="#installation-issues" title="Permalink to this heading">¶</a></h2>
@@ -396,34 +424,6 @@ To<span class="w"> </span>change<span class="w"> </span>your<span class="w"> </s
 <p>Typically issues arise from pinned version clash. If you are seeing a module build error you should create a new virtual environment and try to install it in isolation there first.</p>
 </section>
 </section>
-<section id="test-and-adjust">
-<h2>Test and Adjust<a class="headerlink" href="#test-and-adjust" title="Permalink to this heading">¶</a></h2>
-<p>Once you have verified the installation completed successfully you should test
-the quality of your hardware. Run the following command from the base directory</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.<span class="w"> </span>./scripts/init_env.sh
-</pre></div>
-</div>
-<p>Yes, that’s <strong>dot space dot slash</strong>. Next run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./framework/services/recognizer/recognizer.sh
-</pre></div>
-</div>
-<p>This will run the recognizer using the default system configuration values.
-You should see what you say printed on the screen. Your output should look
-similar to this</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Recording<span class="w"> </span>WAVE<span class="w"> </span><span class="s1">&#39;stdin&#39;</span><span class="w"> </span>:<span class="w"> </span>Signed<span class="w"> </span><span class="m">16</span><span class="w"> </span>bit<span class="w"> </span>Little<span class="w"> </span>Endian,<span class="w"> </span>Rate<span class="w"> </span><span class="m">16000</span><span class="w"> </span>Hz,<span class="w"> </span>Mono
-STT<span class="w"> </span>Transcriber<span class="w"> </span>is<span class="w"> </span>Running
-BUS:Not<span class="w"> </span>Connected,<span class="w"> </span>MIN_WAV:9600<span class="w"> </span>bytes,<span class="w"> </span>VAD:1,<span class="w"> </span>MODEL:small.en,<span class="w"> </span>RST:3.5<span class="w"> </span>seconds
-<span class="o">[</span><span class="m">58240</span><span class="o">][</span><span class="m">1</span>.820000<span class="w"> </span>secs<span class="o">]</span>Took<span class="w"> </span><span class="m">1</span>.303991<span class="w"> </span>secs:<span class="w"> </span>Testing,<span class="w"> </span>one,<span class="w"> </span>two,<span class="w"> </span>three.
-<span class="o">[</span><span class="m">25600</span><span class="o">][</span><span class="m">0</span>.800000<span class="w"> </span>secs<span class="o">]</span>Took<span class="w"> </span><span class="m">0</span>.200814<span class="w"> </span>secs:<span class="w"> </span>Goodbye.
-</pre></div>
-</div>
-<p>Hit Ctl+C at any time to exit the program.</p>
-<p>The output shown above lists several important values.</p>
-<p>First, the numbers 58240 and 25600 represent the size of the wav data produced by your utterance. Since we sample two bytes 16,000 times a second we camn simply use this to convert to seconds of input which is the next number shown, followed by how long it took to transcribe that wav data into a text string.</p>
-<p>From the output we can see that using the <em>small.en</em> model we are getting close to a 1:1 ratio of input time to transcribe time.</p>
-<p>If we were to change the STT model in the <strong>yava.yml</strong> file to <em>tiny.en</em> and restart we would expect to see the time to transcribe decrease along with the accuracy. The required memory for the <em>tiny.en</em> model is below 1GB.</p>
-<p>You should experiment with this setting until you are satisfied it is working in a manner that is agreeable to you. In some cases you may prefer speed over accuracy, etc. It is important to verify your wake word is being picked up consistently. Poor wake word selection will cause poor activation. Wake words should be somewhat rare in your normal lexicon to reduce false activations. They should also have some distinctive characteristics like a hard consonant or two, or some distinctive quality.</p>
-</section>
 <section id="operational-issues">
 <h2>Operational Issues<a class="headerlink" href="#operational-issues" title="Permalink to this heading">¶</a></h2>
 <section id="memory-concerns">
@@ -541,13 +541,13 @@ You can either stop the recognizer and then set the volume and rerun the recogni
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verify-system">Verify System</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clone-repo">Clone Repo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-and-adjust">Test and Adjust</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-issues">Installation Issues</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#device-names">Device Names</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#alsa-names">ALSA Names</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#software-modules">Software Modules</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#test-and-adjust">Test and Adjust</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#operational-issues">Operational Issues</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#memory-concerns">Memory Concerns</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#microphone-issues">Microphone Issues</a></li>
