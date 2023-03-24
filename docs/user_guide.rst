@@ -110,6 +110,23 @@ For example
 WW <<brief delay>> stop
 
 ==================
+The System Monitor
+==================
+The system monitor is a web page which is found in the *test/* directory. You simply 
+open it in any web browser and it will show you all the messages being sent on the message bus.
+
+.. image:: _static/sysmon.png
+  :width: 500
+  :alt: System Monitor Image
+
+If you are viewing the system monitor on a different machine than where PriVoice is running 
+you will need to click the PriVoice logo in the upper left of the screen and enter the IP
+address where your PriVoice device is running.
+
+You can use the PriVoice system monitor to see what the speech recognizer thought you said. 
+This can sometimes be helpful with debugging and adjusting the audio levels.
+
+==================
 System Information
 ==================
 By default, the system operates in offline mode. If
