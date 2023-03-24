@@ -217,6 +217,42 @@ Edit this file to point to your new repository. Change the values MYHOME and MYR
 
 The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills.
 
+
+-------------
+Skill Intents
+-------------
+An intent is the matching of an endpoint (a method in the skill) with a sentence type, subject and a verb. 
+
+
+.. code-block:: python
+   :linenos:
+
+    self.register_intent('C', 'turn', 'light', self.handle_change_light)
+
+
+In the above example the method handle_change_light will be called when the user speaks 'turn on the light' or 'turn off the light'.
+
+------------------
+Implicit Ailiasing
+------------------
+It is often convenient to alias both the subject and verb. For example, regardless of whether the user says 'shut the light' or 'turn off the light' or 'set the light on' in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This may be considered aliasing the verb alter where alter could be one of (change, turn, modify, set). We can call this verb aliasing. 
+
+This code snippet from the volume skill demonstrates implicit aliasing of both a set of nouns and a set of verbs.
+
+
+.. code-block:: python
+   :linenos:
+
+    commands = ['set', 'change', 'modify']
+    subjects = ['microphone', 'mic', 'input']
+
+    # input volume
+    for subject in subjects:
+        for command in commands:
+            self.register_intent('C', command, subject, self.handle_change_mic)
+            inactive_state_intents.append( 'C' + ':' + subject + ':' + command )
+
+
 ===============
 Skill Operation
 ===============

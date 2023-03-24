@@ -202,6 +202,29 @@ It is located in framework/services/skill_mamager/repositories.json.</p>
 </div>
 <p>The next time you restart the system it will pick up your repo and you can use the skill manager to install and run your skills.</p>
 </section>
+<section id="skill-intents">
+<h3>Skill Intents<a class="headerlink" href="#skill-intents" title="Permalink to this heading">¶</a></h3>
+<p>An intent is the matching of an endpoint (a method in the skill) with a sentence type, subject and a verb.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;turn&#39;</span><span class="p">,</span> <span class="s1">&#39;light&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_light</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above example the method handle_change_light will be called when the user speaks ‘turn on the light’ or ‘turn off the light’.</p>
+</section>
+<section id="implicit-ailiasing">
+<h3>Implicit Ailiasing<a class="headerlink" href="#implicit-ailiasing" title="Permalink to this heading">¶</a></h3>
+<p>It is often convenient to alias both the subject and verb. For example, regardless of whether the user says ‘shut the light’ or ‘turn off the light’ or ‘set the light on’ in all cases we really just want to call the same method (assuming it can easily derive the value) which will ultimately alter the value of the light. This may be considered aliasing the verb alter where alter could be one of (change, turn, modify, set). We can call this verb aliasing.</p>
+<p>This code snippet from the volume skill demonstrates implicit aliasing of both a set of nouns and a set of verbs.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span> <span class="n">commands</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">]</span>
+<span class="linenos">2</span> <span class="n">subjects</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;microphone&#39;</span><span class="p">,</span> <span class="s1">&#39;mic&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">]</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span> <span class="c1"># input volume</span>
+<span class="linenos">5</span> <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
+<span class="linenos">6</span>     <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+<span class="linenos">7</span>         <span class="bp">self</span><span class="o">.</span><span class="n">register_intent</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_change_mic</span><span class="p">)</span>
+<span class="linenos">8</span>         <span class="n">inactive_state_intents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s1">&#39;C&#39;</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">subject</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">command</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="skill-operation">
 <h2>Skill Operation<a class="headerlink" href="#skill-operation" title="Permalink to this heading">¶</a></h2>
@@ -518,6 +541,8 @@ def<span class="w"> </span>media_play<span class="o">(</span><span class="w"> </
 <li class="toctree-l2"><a class="reference internal" href="#creating-skills">Creating Skills</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hello-world">Hello World</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-local-repository">Creating a Local Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skill-intents">Skill Intents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implicit-ailiasing">Implicit Ailiasing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#skill-operation">Skill Operation</a></li>
