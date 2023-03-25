@@ -1,5 +1,5 @@
-Privox Source Code
-******************
+PriVoice Source Code
+********************
 
 .. toctree::
    :maxdepth: 2
